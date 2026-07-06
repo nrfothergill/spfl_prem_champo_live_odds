@@ -225,6 +225,10 @@ h2 {
   margin-top: 10px;
 }
 
+.inline-actions button:only-child {
+  grid-column: 1 / -1;
+}
+
 label {
   display: grid;
   gap: 6px;
@@ -355,6 +359,226 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.view-tab {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 14px;
+  background: white;
+  color: var(--ink);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.view-tab.is-active {
+  border-color: var(--green);
+  background: var(--green);
+  color: white;
+}
+
+.view-panel {
+  display: none;
+}
+
+.view-panel--active {
+  display: block;
+}
+
+.odds-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.25fr);
+  gap: 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background: #102018;
+  color: white;
+}
+
+.odds-hero span,
+.dashboard-title span,
+.dashboard-row span,
+.dashboard-row em,
+.history-summary span,
+.history-row em {
+  display: block;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.odds-hero span,
+.odds-hero em {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.odds-hero strong {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(1.5rem, 3vw, 2.6rem);
+  letter-spacing: 0;
+}
+
+.odds-hero em {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.odds-hero__stat {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.8fr);
+  gap: 14px;
+}
+
+.dashboard-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: white;
+  box-shadow: 0 10px 24px rgba(14, 32, 26, 0.05);
+}
+
+.dashboard-card--large {
+  grid-row: span 2;
+}
+
+.dashboard-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dashboard-title strong {
+  color: var(--green-dark);
+  text-align: right;
+}
+
+.dashboard-list {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px minmax(170px, 0.7fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #f7faf8;
+}
+
+.dashboard-row--compact {
+  grid-template-columns: minmax(0, 1fr) 100px minmax(100px, 0.6fr);
+}
+
+.dashboard-row b {
+  color: var(--green-dark);
+  font-size: 1rem;
+  text-align: right;
+}
+
+.mini-metrics,
+.history-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mini-metrics div,
+.history-summary div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #f7faf8;
+}
+
+.mini-metrics strong,
+.history-summary strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+}
+
+.empty--inline {
+  grid-column: auto;
+  padding: 20px;
+}
+
+.backtest-history {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: white;
+  box-shadow: 0 10px 24px rgba(14, 32, 26, 0.05);
+}
+
+.history-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.history-table {
+  display: grid;
+  gap: 8px;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(140px, 0.75fr) minmax(110px, 0.5fr) minmax(150px, 0.8fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #f7faf8;
+}
+
+.history-row--head {
+  background: #edf3ef;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.history-row strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.history-row .hit {
+  color: #00a84f;
+  font-weight: 950;
+}
+
+.history-row .miss {
+  color: #9a4425;
 }
 
 .card {
@@ -609,11 +833,15 @@ textarea {
   .control-grid,
   .workspace,
   .prediction-grid,
+  .dashboard-grid,
+  .odds-hero,
+  .history-row,
   .backtest-panel {
     grid-template-columns: 1fr;
   }
 
   .backtest-metrics,
+  .history-summary,
   .odds-grid,
   .live-notes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -638,9 +866,16 @@ textarea {
   .markets,
   .lineup-editor,
   .backtest-metrics,
+  .dashboard-row,
+  .dashboard-row--compact,
+  .history-summary,
   .odds-grid,
   .live-notes {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-row b {
+    text-align: left;
   }
 
   .toolbar {

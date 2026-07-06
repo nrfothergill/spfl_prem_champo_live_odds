@@ -7,9 +7,37 @@ const COMPETITIONS = {
     oddsKeys: ["soccer_epl"],
     apiFootballLeague: 39,
   },
+  "ligue-1": {
+    oddsKeys: ["soccer_france_ligue_one"],
+    apiFootballLeague: 61,
+  },
+  bundesliga: {
+    oddsKeys: ["soccer_germany_bundesliga"],
+    apiFootballLeague: 78,
+  },
+  "la-liga": {
+    oddsKeys: ["soccer_spain_la_liga"],
+    apiFootballLeague: 140,
+  },
+  "serie-a": {
+    oddsKeys: ["soccer_italy_serie_a"],
+    apiFootballLeague: 135,
+  },
+  "primeira-liga": {
+    oddsKeys: ["soccer_portugal_primeira_liga"],
+    apiFootballLeague: 94,
+  },
   "champions-league": {
     oddsKeys: ["soccer_uefa_champs_league"],
     apiFootballLeague: 2,
+  },
+  "europa-league": {
+    oddsKeys: ["soccer_uefa_europa_league"],
+    apiFootballLeague: 3,
+  },
+  "conference-league": {
+    oddsKeys: ["soccer_uefa_europa_conference_league"],
+    apiFootballLeague: 848,
   },
 };
 
@@ -92,13 +120,9 @@ function statValue(stats, teamName, labels) {
   return Number.isFinite(value) ? value : null;
 }
 
-async function fetchFixtureContext(competition) {
+async function fetchFixtureContext(competition, fixtureParams) {
   if (!process.env.API_FOOTBALL_KEY) return [];
-  const fixtures = await apiFootball("fixtures", {
-    league: competition.apiFootballLeague,
-    season: "2026",
-    next: "20",
-  });
+  const fixtures = await apiFootball("fixtures", fixtureParams);
   const games = [];
   for (const fixture of fixtures?.response || []) {
     const fixtureId = fixture.fixture?.id;
@@ -129,6 +153,22 @@ async function fetchFixtureContext(competition) {
   return games;
 }
 
+async function fetchFixtureContexts(competition) {
+  const [upcoming, live] = await Promise.all([
+    fetchFixtureContext(competition, {
+      league: competition.apiFootballLeague,
+      season: "2026",
+      next: "30",
+    }).catch(() => []),
+    fetchFixtureContext(competition, {
+      league: competition.apiFootballLeague,
+      season: "2026",
+      live: "all",
+    }).catch(() => []),
+  ]);
+  return mergeGames(upcoming, live);
+}
+
 function mergeGames(...groups) {
   const map = new Map();
   groups.flat().forEach((game) => {
@@ -148,8 +188,9 @@ export default async function handler(request, response) {
 
   const [oddsGames, contextGames] = await Promise.all([
     fetchOdds(competition).catch(() => []),
-    fetchFixtureContext(competition).catch(() => []),
+    fetchFixtureContexts(competition).catch(() => []),
   ]);
+  response.setHeader("Cache-Control", "no-store, max-age=0");
   response.status(200).json({
     providerStatus: [
       process.env.ODDS_API_KEY ? "Odds connected" : "Odds key missing",

@@ -20,6 +20,22 @@ const TEAM_ALIASES = new Map([
   ["West Ham", "West Ham United"],
   ["Brighton", "Brighton & Hove Albion"],
   ["Wolves", "Wolverhampton Wanderers"],
+  ["Paris SG", "Paris Saint-Germain"],
+  ["Ath Madrid", "Atletico Madrid"],
+  ["Ath Bilbao", "Athletic Bilbao"],
+  ["Betis", "Real Betis"],
+  ["Sociedad", "Real Sociedad"],
+  ["Vallecano", "Rayo Vallecano"],
+  ["Inter", "Inter Milan"],
+  ["Milan", "AC Milan"],
+  ["Dortmund", "Borussia Dortmund"],
+  ["Ein Frankfurt", "Eintracht Frankfurt"],
+  ["M'gladbach", "Borussia Monchengladbach"],
+  ["Leverkusen", "Bayer Leverkusen"],
+  ["FC Koln", "Koln"],
+  ["Sp Lisbon", "Sporting CP"],
+  ["Sporting", "Sporting CP"],
+  ["Guimaraes", "Vitoria Guimaraes"],
 ]);
 
 const COMPETITIONS = {
@@ -151,6 +167,361 @@ const COMPETITIONS = {
       },
     ],
   },
+  "ligue-1": {
+    label: "Ligue 1",
+    eyebrow: "French Ligue 1 2026/27",
+    storageKey: "football-model-ligue-1-v2",
+    currentSeasonUrl: "https://www.football-data.co.uk/mmz4281/2627/F1.csv",
+    liveProvider: {
+      oddsApiKeys: ["soccer_france_ligue_one"],
+      apiFootballLeague: 61,
+    },
+    teams: [
+      "Paris Saint-Germain",
+      "Marseille",
+      "Monaco",
+      "Lyon",
+      "Lille",
+      "Nice",
+      "Rennes",
+      "Lens",
+      "Strasbourg",
+      "Toulouse",
+      "Nantes",
+      "Montpellier",
+      "Brest",
+      "Reims",
+      "Auxerre",
+      "Angers",
+      "Lorient",
+      "Paris FC",
+    ],
+    priors: {
+      "Paris Saint-Germain": 1.34,
+      Marseille: 1.15,
+      Monaco: 1.14,
+      Lyon: 1.1,
+      Lille: 1.08,
+      Nice: 1.04,
+      Rennes: 1.02,
+      Lens: 1.01,
+      Strasbourg: 0.98,
+      Toulouse: 0.95,
+      Nantes: 0.92,
+      Montpellier: 0.9,
+      Brest: 0.9,
+      Reims: 0.89,
+      Auxerre: 0.87,
+      Angers: 0.85,
+      Lorient: 0.84,
+      "Paris FC": 0.83,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "Gameweek 1",
+        startDate: "2026-08-14",
+        endDate: "2026-08-17",
+        fixtures: [
+          { date: "2026-08-14", time: "20:00", home: "Paris Saint-Germain", away: "Lorient" },
+          { date: "2026-08-15", time: "16:00", home: "Marseille", away: "Paris FC" },
+          { date: "2026-08-15", time: "18:00", home: "Monaco", away: "Angers" },
+          { date: "2026-08-15", time: "20:00", home: "Lyon", away: "Auxerre" },
+          { date: "2026-08-16", time: "14:00", home: "Lille", away: "Reims" },
+          { date: "2026-08-16", time: "16:00", home: "Nice", away: "Brest" },
+          { date: "2026-08-16", time: "18:00", home: "Rennes", away: "Montpellier" },
+          { date: "2026-08-16", time: "20:00", home: "Lens", away: "Nantes" },
+          { date: "2026-08-17", time: "20:00", home: "Strasbourg", away: "Toulouse" },
+        ],
+      },
+    ],
+  },
+  bundesliga: {
+    label: "Bundesliga",
+    eyebrow: "German Bundesliga 2026/27",
+    storageKey: "football-model-bundesliga-v2",
+    currentSeasonUrl: "https://www.football-data.co.uk/mmz4281/2627/D1.csv",
+    liveProvider: {
+      oddsApiKeys: ["soccer_germany_bundesliga"],
+      apiFootballLeague: 78,
+    },
+    teams: [
+      "Bayern Munich",
+      "Borussia Dortmund",
+      "RB Leipzig",
+      "Bayer Leverkusen",
+      "Eintracht Frankfurt",
+      "Stuttgart",
+      "Wolfsburg",
+      "Freiburg",
+      "Union Berlin",
+      "Werder Bremen",
+      "Borussia Monchengladbach",
+      "Mainz",
+      "Augsburg",
+      "Hoffenheim",
+      "Heidenheim",
+      "Hamburg",
+      "Koln",
+      "St Pauli",
+    ],
+    priors: {
+      "Bayern Munich": 1.3,
+      "Borussia Dortmund": 1.16,
+      "RB Leipzig": 1.14,
+      "Bayer Leverkusen": 1.13,
+      "Eintracht Frankfurt": 1.07,
+      Stuttgart: 1.05,
+      Wolfsburg: 0.99,
+      Freiburg: 0.98,
+      "Union Berlin": 0.95,
+      "Werder Bremen": 0.94,
+      "Borussia Monchengladbach": 0.94,
+      Mainz: 0.92,
+      Augsburg: 0.9,
+      Hoffenheim: 0.9,
+      Heidenheim: 0.88,
+      Hamburg: 0.86,
+      Koln: 0.85,
+      "St Pauli": 0.84,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "Gameweek 1",
+        startDate: "2026-08-21",
+        endDate: "2026-08-23",
+        fixtures: [
+          { date: "2026-08-21", time: "19:30", home: "Bayern Munich", away: "St Pauli" },
+          { date: "2026-08-22", time: "14:30", home: "Borussia Dortmund", away: "Koln" },
+          { date: "2026-08-22", time: "14:30", home: "RB Leipzig", away: "Hamburg" },
+          { date: "2026-08-22", time: "14:30", home: "Bayer Leverkusen", away: "Heidenheim" },
+          { date: "2026-08-22", time: "17:30", home: "Eintracht Frankfurt", away: "Hoffenheim" },
+          { date: "2026-08-23", time: "14:30", home: "Stuttgart", away: "Augsburg" },
+          { date: "2026-08-23", time: "16:30", home: "Wolfsburg", away: "Mainz" },
+          { date: "2026-08-23", time: "18:30", home: "Freiburg", away: "Borussia Monchengladbach" },
+          { date: "2026-08-23", time: "18:30", home: "Union Berlin", away: "Werder Bremen" },
+        ],
+      },
+    ],
+  },
+  "la-liga": {
+    label: "La Liga",
+    eyebrow: "Spanish La Liga 2026/27",
+    storageKey: "football-model-la-liga-v2",
+    currentSeasonUrl: "https://www.football-data.co.uk/mmz4281/2627/SP1.csv",
+    liveProvider: {
+      oddsApiKeys: ["soccer_spain_la_liga"],
+      apiFootballLeague: 140,
+    },
+    teams: [
+      "Real Madrid",
+      "Barcelona",
+      "Atletico Madrid",
+      "Athletic Bilbao",
+      "Villarreal",
+      "Real Betis",
+      "Real Sociedad",
+      "Sevilla",
+      "Valencia",
+      "Celta Vigo",
+      "Osasuna",
+      "Getafe",
+      "Mallorca",
+      "Rayo Vallecano",
+      "Girona",
+      "Espanyol",
+      "Alaves",
+      "Levante",
+      "Elche",
+      "Real Valladolid",
+    ],
+    priors: {
+      "Real Madrid": 1.3,
+      Barcelona: 1.27,
+      "Atletico Madrid": 1.18,
+      "Athletic Bilbao": 1.08,
+      Villarreal: 1.06,
+      "Real Betis": 1.03,
+      "Real Sociedad": 1.02,
+      Sevilla: 0.99,
+      Valencia: 0.96,
+      "Celta Vigo": 0.94,
+      Osasuna: 0.93,
+      Getafe: 0.91,
+      Mallorca: 0.91,
+      "Rayo Vallecano": 0.9,
+      Girona: 0.9,
+      Espanyol: 0.88,
+      Alaves: 0.86,
+      Levante: 0.85,
+      Elche: 0.84,
+      "Real Valladolid": 0.82,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "Gameweek 1",
+        startDate: "2026-08-14",
+        endDate: "2026-08-17",
+        fixtures: [
+          { date: "2026-08-14", time: "20:00", home: "Real Madrid", away: "Real Valladolid" },
+          { date: "2026-08-15", time: "17:30", home: "Barcelona", away: "Elche" },
+          { date: "2026-08-15", time: "20:00", home: "Atletico Madrid", away: "Levante" },
+          { date: "2026-08-16", time: "16:00", home: "Athletic Bilbao", away: "Alaves" },
+          { date: "2026-08-16", time: "18:30", home: "Villarreal", away: "Espanyol" },
+          { date: "2026-08-16", time: "20:00", home: "Real Betis", away: "Girona" },
+          { date: "2026-08-17", time: "18:30", home: "Real Sociedad", away: "Rayo Vallecano" },
+          { date: "2026-08-17", time: "20:00", home: "Sevilla", away: "Mallorca" },
+          { date: "2026-08-17", time: "20:00", home: "Valencia", away: "Getafe" },
+          { date: "2026-08-17", time: "20:00", home: "Celta Vigo", away: "Osasuna" },
+        ],
+      },
+    ],
+  },
+  "serie-a": {
+    label: "Serie A",
+    eyebrow: "Italian Serie A 2026/27",
+    storageKey: "football-model-serie-a-v2",
+    currentSeasonUrl: "https://www.football-data.co.uk/mmz4281/2627/I1.csv",
+    liveProvider: {
+      oddsApiKeys: ["soccer_italy_serie_a"],
+      apiFootballLeague: 135,
+    },
+    teams: [
+      "Inter Milan",
+      "Juventus",
+      "AC Milan",
+      "Napoli",
+      "Atalanta",
+      "Roma",
+      "Lazio",
+      "Fiorentina",
+      "Bologna",
+      "Torino",
+      "Genoa",
+      "Udinese",
+      "Cagliari",
+      "Verona",
+      "Lecce",
+      "Parma",
+      "Como",
+      "Sassuolo",
+      "Pisa",
+      "Cremonese",
+    ],
+    priors: {
+      "Inter Milan": 1.25,
+      Juventus: 1.18,
+      "AC Milan": 1.17,
+      Napoli: 1.16,
+      Atalanta: 1.12,
+      Roma: 1.08,
+      Lazio: 1.06,
+      Fiorentina: 1.04,
+      Bologna: 1.02,
+      Torino: 0.96,
+      Genoa: 0.92,
+      Udinese: 0.91,
+      Cagliari: 0.89,
+      Verona: 0.88,
+      Lecce: 0.87,
+      Parma: 0.86,
+      Como: 0.85,
+      Sassuolo: 0.84,
+      Pisa: 0.82,
+      Cremonese: 0.81,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "Gameweek 1",
+        startDate: "2026-08-22",
+        endDate: "2026-08-24",
+        fixtures: [
+          { date: "2026-08-22", time: "17:30", home: "Inter Milan", away: "Cremonese" },
+          { date: "2026-08-22", time: "19:45", home: "Juventus", away: "Pisa" },
+          { date: "2026-08-23", time: "17:30", home: "AC Milan", away: "Sassuolo" },
+          { date: "2026-08-23", time: "19:45", home: "Napoli", away: "Como" },
+          { date: "2026-08-23", time: "19:45", home: "Atalanta", away: "Parma" },
+          { date: "2026-08-24", time: "17:30", home: "Roma", away: "Lecce" },
+          { date: "2026-08-24", time: "17:30", home: "Lazio", away: "Verona" },
+          { date: "2026-08-24", time: "19:45", home: "Fiorentina", away: "Cagliari" },
+          { date: "2026-08-24", time: "19:45", home: "Bologna", away: "Udinese" },
+          { date: "2026-08-24", time: "19:45", home: "Torino", away: "Genoa" },
+        ],
+      },
+    ],
+  },
+  "primeira-liga": {
+    label: "Primeira Liga",
+    eyebrow: "Portuguese Primeira Liga 2026/27",
+    storageKey: "football-model-primeira-liga-v2",
+    currentSeasonUrl: "https://www.football-data.co.uk/mmz4281/2627/P1.csv",
+    liveProvider: {
+      oddsApiKeys: ["soccer_portugal_primeira_liga"],
+      apiFootballLeague: 94,
+    },
+    teams: [
+      "Benfica",
+      "Porto",
+      "Sporting CP",
+      "Braga",
+      "Vitoria Guimaraes",
+      "Famalicao",
+      "Casa Pia",
+      "Moreirense",
+      "Arouca",
+      "Rio Ave",
+      "Estoril",
+      "Boavista",
+      "Gil Vicente",
+      "Nacional",
+      "AVS",
+      "Santa Clara",
+      "Tondela",
+      "Alverca",
+    ],
+    priors: {
+      Benfica: 1.26,
+      Porto: 1.22,
+      "Sporting CP": 1.22,
+      Braga: 1.12,
+      "Vitoria Guimaraes": 1.04,
+      Famalicao: 0.97,
+      "Casa Pia": 0.94,
+      Moreirense: 0.93,
+      Arouca: 0.91,
+      "Rio Ave": 0.9,
+      Estoril: 0.89,
+      Boavista: 0.88,
+      "Gil Vicente": 0.88,
+      Nacional: 0.86,
+      AVS: 0.85,
+      "Santa Clara": 0.84,
+      Tondela: 0.82,
+      Alverca: 0.81,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "Gameweek 1",
+        startDate: "2026-08-07",
+        endDate: "2026-08-10",
+        fixtures: [
+          { date: "2026-08-07", time: "20:15", home: "Benfica", away: "Alverca" },
+          { date: "2026-08-08", time: "18:00", home: "Porto", away: "Tondela" },
+          { date: "2026-08-08", time: "20:30", home: "Sporting CP", away: "Santa Clara" },
+          { date: "2026-08-09", time: "15:30", home: "Braga", away: "AVS" },
+          { date: "2026-08-09", time: "18:00", home: "Vitoria Guimaraes", away: "Nacional" },
+          { date: "2026-08-09", time: "20:30", home: "Famalicao", away: "Gil Vicente" },
+          { date: "2026-08-10", time: "18:00", home: "Casa Pia", away: "Boavista" },
+          { date: "2026-08-10", time: "20:15", home: "Moreirense", away: "Estoril" },
+          { date: "2026-08-10", time: "20:15", home: "Arouca", away: "Rio Ave" },
+        ],
+      },
+    ],
+  },
   "champions-league": {
     label: "Champions League",
     eyebrow: "UEFA Champions League 2026/27",
@@ -220,12 +591,176 @@ const COMPETITIONS = {
     ],
     note: "Fixture draw pending. Replace these placeholder league-phase fixtures after UEFA publishes the draw.",
   },
+  "europa-league": {
+    label: "Europa League",
+    eyebrow: "UEFA Europa League 2026/27",
+    storageKey: "football-model-europa-league-v2",
+    currentSeasonUrl: "",
+    liveProvider: {
+      oddsApiKeys: ["soccer_uefa_europa_league"],
+      apiFootballLeague: 3,
+    },
+    teams: [
+      "Tottenham Hotspur",
+      "Manchester United",
+      "Roma",
+      "Lazio",
+      "Real Betis",
+      "Real Sociedad",
+      "Porto",
+      "Braga",
+      "Lyon",
+      "Marseille",
+      "Eintracht Frankfurt",
+      "Freiburg",
+      "Ajax",
+      "PSV Eindhoven",
+      "Feyenoord",
+      "Rangers",
+      "Celtic",
+      "Fenerbahce",
+      "Galatasaray",
+      "Olympiacos",
+      "Shakhtar Donetsk",
+      "Dynamo Kyiv",
+      "Sporting CP",
+      "Villarreal",
+    ],
+    priors: {
+      "Tottenham Hotspur": 1.15,
+      "Manchester United": 1.15,
+      Roma: 1.11,
+      Lazio: 1.09,
+      "Real Betis": 1.06,
+      "Real Sociedad": 1.06,
+      Porto: 1.12,
+      Braga: 1.05,
+      Lyon: 1.05,
+      Marseille: 1.08,
+      "Eintracht Frankfurt": 1.07,
+      Freiburg: 1.0,
+      Ajax: 1.06,
+      "PSV Eindhoven": 1.08,
+      Feyenoord: 1.06,
+      Rangers: 1.05,
+      Celtic: 1.05,
+      Fenerbahce: 1.04,
+      Galatasaray: 1.05,
+      Olympiacos: 1.0,
+      "Shakhtar Donetsk": 0.98,
+      "Dynamo Kyiv": 0.96,
+      "Sporting CP": 1.1,
+      Villarreal: 1.07,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "League Phase Matchday 1",
+        startDate: "2026-09-24",
+        endDate: "2026-09-25",
+        fixtures: [
+          { date: "2026-09-24", time: "17:45", home: "Tottenham Hotspur", away: "Roma" },
+          { date: "2026-09-24", time: "17:45", home: "Manchester United", away: "Real Betis" },
+          { date: "2026-09-24", time: "20:00", home: "Porto", away: "Lyon" },
+          { date: "2026-09-24", time: "20:00", home: "Marseille", away: "Ajax" },
+          { date: "2026-09-25", time: "17:45", home: "Rangers", away: "Fenerbahce" },
+          { date: "2026-09-25", time: "17:45", home: "Celtic", away: "Olympiacos" },
+          { date: "2026-09-25", time: "20:00", home: "Sporting CP", away: "Eintracht Frankfurt" },
+          { date: "2026-09-25", time: "20:00", home: "Villarreal", away: "Galatasaray" },
+        ],
+      },
+    ],
+    note: "Fixture draw pending. Replace these placeholder league-phase fixtures after UEFA publishes the draw.",
+  },
+  "conference-league": {
+    label: "Conference League",
+    eyebrow: "UEFA Conference League 2026/27",
+    storageKey: "football-model-conference-league-v2",
+    currentSeasonUrl: "",
+    liveProvider: {
+      oddsApiKeys: ["soccer_uefa_europa_conference_league"],
+      apiFootballLeague: 848,
+    },
+    teams: [
+      "Chelsea",
+      "Fiorentina",
+      "Real Betis",
+      "Lille",
+      "Nice",
+      "Vitoria Guimaraes",
+      "AZ Alkmaar",
+      "Twente",
+      "Gent",
+      "Club Brugge",
+      "Copenhagen",
+      "Brondby",
+      "Hearts",
+      "Hibernian",
+      "Panathinaikos",
+      "PAOK",
+      "Basel",
+      "Young Boys",
+      "Slavia Prague",
+      "Sparta Prague",
+      "Legia Warsaw",
+      "Rapid Vienna",
+      "Djurgarden",
+      "Molde",
+    ],
+    priors: {
+      Chelsea: 1.2,
+      Fiorentina: 1.12,
+      "Real Betis": 1.1,
+      Lille: 1.08,
+      Nice: 1.06,
+      "Vitoria Guimaraes": 1.02,
+      "AZ Alkmaar": 1.06,
+      Twente: 1.03,
+      Gent: 1.02,
+      "Club Brugge": 1.07,
+      Copenhagen: 1.04,
+      Brondby: 0.98,
+      Hearts: 0.94,
+      Hibernian: 0.91,
+      Panathinaikos: 1.0,
+      PAOK: 1.01,
+      Basel: 0.99,
+      "Young Boys": 1.02,
+      "Slavia Prague": 1.03,
+      "Sparta Prague": 1.02,
+      "Legia Warsaw": 0.98,
+      "Rapid Vienna": 0.97,
+      Djurgarden: 0.95,
+      Molde: 0.96,
+    },
+    gameweeks: [
+      {
+        id: 1,
+        name: "League Phase Matchday 1",
+        startDate: "2026-10-01",
+        endDate: "2026-10-01",
+        fixtures: [
+          { date: "2026-10-01", time: "17:45", home: "Chelsea", away: "Gent" },
+          { date: "2026-10-01", time: "17:45", home: "Fiorentina", away: "Copenhagen" },
+          { date: "2026-10-01", time: "17:45", home: "Lille", away: "Hearts" },
+          { date: "2026-10-01", time: "17:45", home: "Nice", away: "Panathinaikos" },
+          { date: "2026-10-01", time: "20:00", home: "AZ Alkmaar", away: "Basel" },
+          { date: "2026-10-01", time: "20:00", home: "Club Brugge", away: "PAOK" },
+          { date: "2026-10-01", time: "20:00", home: "Slavia Prague", away: "Molde" },
+          { date: "2026-10-01", time: "20:00", home: "Vitoria Guimaraes", away: "Legia Warsaw" },
+        ],
+      },
+    ],
+    note: "Fixture draw pending. Replace these placeholder league-phase fixtures after UEFA publishes the draw.",
+  },
 };
 
 let activeCompetitionId = localStorage.getItem("football-model-active-competition") || "spfl";
+let activeView = localStorage.getItem("football-model-active-view") || "odds";
 let state = createInitialState(activeCompetitionId);
 let lineupRenderTimer;
 let backtestCache = {};
+let liveRefreshTimer;
 
 const el = (id) => document.getElementById(id);
 const activeConfig = () => COMPETITIONS[activeCompetitionId];
@@ -393,10 +928,16 @@ function normaliseCsvDate(value) {
 function normaliseStateShape() {
   if (!Array.isArray(state.gameweeks) || !state.gameweeks.length) state.gameweeks = cloneGameweeks(activeCompetitionId);
   if (!Array.isArray(state.matches)) state.matches = [];
+  const bundled = bundledMatches(activeCompetitionId);
+  if (bundled.length && (state.synthetic || state.source === "Fallback calibration")) {
+    state.matches = bundled;
+    state.source = "Bundled Football-Data CSV archive";
+    state.synthetic = false;
+  }
   if (!state.lineups || typeof state.lineups !== "object") state.lineups = {};
   if (!state.odds || typeof state.odds !== "object") state.odds = {};
   if (!state.live || typeof state.live !== "object") state.live = {};
-  if (typeof state.synthetic !== "boolean") state.synthetic = state.source === "Fallback calibration" && !bundledMatches(activeCompetitionId).length;
+  if (typeof state.synthetic !== "boolean") state.synthetic = state.source === "Fallback calibration" && !bundled.length;
   state.currentGameweek = clamp(Number(state.currentGameweek) || 0, 0, state.gameweeks.length - 1);
 }
 
@@ -466,11 +1007,43 @@ function buildFallbackMatches(competitionId) {
           away,
           hg: clamp(Math.round(1.2 + (homeRating - awayRating) + ((hi + season) % 3) * 0.3), 0, 5),
           ag: clamp(Math.round(1.0 - (homeRating - awayRating) * 0.75 + ((ai + season) % 3) * 0.2), 0, 4),
+          synthetic: true,
         });
       });
     });
   }
   return matches;
+}
+
+function realCompletedMatches() {
+  return state.matches.filter((match) => !match.synthetic);
+}
+
+const DOMESTIC_BLEND_COMPETITIONS = ["premier-league", "ligue-1", "bundesliga", "la-liga", "serie-a", "primeira-liga", "spfl"];
+const UEFA_BLEND_COMPETITIONS = new Set(["champions-league", "europa-league", "conference-league"]);
+
+function domesticMatchPoolForTeams(teams) {
+  const wanted = new Set(teams);
+  return DOMESTIC_BLEND_COMPETITIONS.flatMap((competitionId) =>
+    bundledMatches(competitionId)
+      .filter((match) => wanted.has(match.home) || wanted.has(match.away))
+      .map((match) => ({ ...match, sourceCompetition: competitionId })),
+  );
+}
+
+function blendedModelMatches(modelMatches = state.matches) {
+  if (!UEFA_BLEND_COMPETITIONS.has(activeCompetitionId)) return modelMatches;
+  const europeanMatches = modelMatches.length ? modelMatches : buildFallbackMatches(activeCompetitionId);
+  const domesticMatches = domesticMatchPoolForTeams(activeTeams());
+  if (!domesticMatches.length) return europeanMatches.map((match) => ({ ...match, weight: 1 }));
+
+  const effectiveSample = 1000;
+  const europeanWeight = (effectiveSample * 0.7) / Math.max(1, europeanMatches.length);
+  const domesticWeight = (effectiveSample * 0.3) / Math.max(1, domesticMatches.length);
+  return [
+    ...europeanMatches.map((match) => ({ ...match, weight: europeanWeight, modelSource: activeCompetitionId })),
+    ...domesticMatches.map((match) => ({ ...match, weight: domesticWeight, modelSource: "domestic" })),
+  ];
 }
 
 function loadState() {
@@ -515,11 +1088,12 @@ function buildTeamModel(matches = state.matches) {
     const away = team[match.away];
     if (!home || !away) return;
     const age = ordered.length - index - 1;
-    const recency = 0.18 + (1 - 0.18) * Math.exp((-age * formWeight) / 190);
+    const matchWeight = Number.isFinite(Number(match.weight)) ? Number(match.weight) : 1;
+    const recency = (0.18 + (1 - 0.18) * Math.exp((-age * formWeight) / 190)) * matchWeight;
 
-    totals.homeGoals += match.hg;
-    totals.awayGoals += match.ag;
-    totals.games += 1;
+    totals.homeGoals += match.hg * matchWeight;
+    totals.awayGoals += match.ag * matchWeight;
+    totals.games += matchWeight;
     home.played += recency;
     away.played += recency;
     home.attackFor += match.hg * recency;
@@ -529,7 +1103,7 @@ function buildTeamModel(matches = state.matches) {
 
     const homeResult = match.hg > match.ag ? 1 : match.hg === match.ag ? 0.5 : 0;
     const expectedHome = 1 / (1 + Math.pow(10, (away.elo - home.elo) / 400));
-    const change = 20 * (Math.log(Math.abs(match.hg - match.ag) + 1) + 1) * (homeResult - expectedHome);
+    const change = 20 * matchWeight * (Math.log(Math.abs(match.hg - match.ag) + 1) + 1) * (homeResult - expectedHome);
     home.elo += change;
     away.elo -= change;
     home.recent = [...home.recent, match.hg - match.ag].slice(-8);
@@ -611,15 +1185,24 @@ function getActiveGameweek() {
   return state.gameweeks[state.currentGameweek];
 }
 
+function blendProbabilities(modelValues, marketValues, weight = 0.22) {
+  const marketTotal = marketValues.reduce((sum, value) => sum + value, 0);
+  if (!marketTotal) return modelValues;
+  const blended = modelValues.map((value, index) => value * (1 - weight) + (marketValues[index] / marketTotal) * weight);
+  const total = blended.reduce((sum, value) => sum + value, 0) || 1;
+  return blended.map((value) => value / total);
+}
+
 function predictFixture(fixture, modelMatches = state.matches, useLineups = true) {
-  const model = buildTeamModel(modelMatches);
+  const preparedMatches = blendedModelMatches(modelMatches);
+  const model = buildTeamModel(preparedMatches);
   const h = model.team[fixture.home] || { elo: 1500, attack: 1, defence: 1, form: 0 };
   const a = model.team[fixture.away] || { elo: 1500, attack: 1, defence: 1, form: 0 };
   const eloGap = (h.elo - a.elo) / 420;
   const formGap = (h.form - a.form) / 10;
   const homeLineup = useLineups ? lineupImpact(getLineup(fixture, "home")) : 1;
   const awayLineup = useLineups ? lineupImpact(getLineup(fixture, "away")) : 1;
-  const h2h = headToHeadAdjustment(fixture.home, fixture.away, modelMatches);
+  const h2h = headToHeadAdjustment(fixture.home, fixture.away, preparedMatches);
   const liveXg = state.live?.[fixtureKey(fixture)]?.xg;
   let homeLambda = clamp(
     model.avgHome * (0.72 + h.attack * 0.38) * (0.78 + a.defence * 0.24) * (1 + MODEL_SETTINGS.homeBoost + eloGap * 0.08 + formGap) * homeLineup * h2h.home,
@@ -661,6 +1244,20 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
   const nonDraw = homeWin + awayWin || 1;
   homeWin = homeWin * ((1 - draw) / nonDraw);
   awayWin = awayWin * ((1 - draw) / nonDraw);
+  const marketOdds = useLineups ? state.odds?.[fixtureKey(fixture)] : null;
+  const market1x2 = marketOdds ? noVigProbabilities([marketOdds.home, marketOdds.draw, marketOdds.away]) : null;
+  if (market1x2) {
+    [homeWin, draw, awayWin] = blendProbabilities([homeWin, draw, awayWin], market1x2, 0.18);
+  }
+
+  const marketBtts = marketOdds ? noVigProbabilities([marketOdds.bttsYes, marketOdds.bttsNo]) : null;
+  if (marketBtts) btts = clamp(btts * 0.82 + marketBtts[0] * 0.18, 0.08, 0.92);
+
+  const marketGoals = marketOdds ? noVigProbabilities([marketOdds.over25, marketOdds.under25]) : null;
+  if (marketGoals) {
+    over25 = clamp(over25 * 0.82 + marketGoals[0] * 0.18, 0.08, 0.92);
+    under25 = 1 - over25;
+  }
 
   const winner = [
     { label: fixture.home, value: homeWin },
@@ -695,10 +1292,11 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
 }
 
 function predictionBacktest() {
-  if (state.synthetic) return { sample: 0, oneXTwo: 0, brier: 0, btts: 0, ou25: 0, exact: 0, favorite: 0, valueBets: 0, valueRoi: 0 };
-  const cacheKey = `${activeCompetitionId}:${state.matches.length}`;
+  const completed = realCompletedMatches();
+  if (completed.length < 80) return { sample: 0, oneXTwo: 0, brier: 0, btts: 0, ou25: 0, exact: 0, favorite: 0, valueBets: 0, valueRoi: 0 };
+  const cacheKey = `${activeCompetitionId}:${completed.length}`;
   if (backtestCache[cacheKey]) return backtestCache[cacheKey];
-  const ordered = [...state.matches]
+  const ordered = [...completed]
     .filter((match) => activeTeams().includes(match.home) && activeTeams().includes(match.away))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
   const warmup = Math.min(420, Math.floor(ordered.length * 0.55));
@@ -827,6 +1425,18 @@ function renderPredictions() {
   attachOddsListeners();
 }
 
+function marketLabel(key) {
+  return {
+    home: "Home win",
+    draw: "Draw",
+    away: "Away win",
+    bttsYes: "BTTS Yes",
+    bttsNo: "BTTS No",
+    over25: "Over 2.5",
+    under25: "Under 2.5",
+  }[key] || key;
+}
+
 function bestBetRows(prediction, odds = {}) {
   const candidates = [
     { key: "home", label: prediction.home, probability: prediction.homeWin, odds: odds.home },
@@ -845,6 +1455,120 @@ function bestBetRows(prediction, odds = {}) {
     })
     .filter((candidate) => candidate.ev != null)
     .sort((a, b) => b.ev - a.ev);
+}
+
+function valueDashboardRows() {
+  const week = getActiveGameweek();
+  if (!week) return [];
+  return week.fixtures
+    .flatMap((fixture) => {
+      const key = fixtureKey(fixture);
+      const prediction = predictFixture(fixture);
+      return bestBetRows(prediction, state.odds?.[key] || {}).map((row) => ({
+        ...row,
+        fixture,
+        key,
+        fixtureLabel: `${fixture.home} v ${fixture.away}`,
+      }));
+    })
+    .filter((row) => row.ev >= MODEL_SETTINGS.edgeThreshold)
+    .sort((a, b) => b.ev - a.ev)
+    .slice(0, 8);
+}
+
+function oddsMovementRows() {
+  const week = getActiveGameweek();
+  if (!week) return [];
+  return week.fixtures
+    .flatMap((fixture) => {
+      const key = fixtureKey(fixture);
+      const movement = state.live?.[key]?.oddsMovement || {};
+      return Object.entries(movement).map(([market, move]) => ({
+        fixture,
+        market,
+        from: move.from,
+        to: move.to,
+        change: move.change,
+        pctChange: move.pctChange,
+        updatedAt: move.updatedAt,
+      }));
+    })
+    .sort((a, b) => Math.abs(b.pctChange || 0) - Math.abs(a.pctChange || 0))
+    .slice(0, 8);
+}
+
+function renderOddsDashboard() {
+  const panel = el("oddsDashboard");
+  const week = getActiveGameweek();
+  const valueRows = valueDashboardRows();
+  const movementRows = oddsMovementRows();
+  const liveFixtures = week?.fixtures.filter((fixture) => {
+    const key = fixtureKey(fixture);
+    return state.live?.[key]?.oddsUpdatedAt || Object.keys(state.odds?.[key] || {}).length;
+  }).length || 0;
+  const backtest = predictionBacktest();
+
+  panel.innerHTML = `
+    <div class="odds-hero">
+      <div>
+        <span>Centre dashboard</span>
+        <strong>${week ? week.name : "Upcoming game week"}</strong>
+        <em>${liveFixtures} fixtures with odds data - ${backtest.sample ? `${pct(backtest.oneXTwo)} rolling 1X2 hit rate` : "backtest pending"}</em>
+      </div>
+      <div class="odds-hero__stat">
+        <span>Best edge</span>
+        <strong>${valueRows[0] ? `${(valueRows[0].ev * 100).toFixed(1)}%` : "Not yet available"}</strong>
+      </div>
+    </div>
+    <div class="dashboard-grid">
+      <section class="dashboard-card dashboard-card--large">
+        <div class="dashboard-title">
+          <span>Best Value Bets</span>
+          <strong>${valueRows.length ? `${valueRows.length} model edges` : "Not yet available"}</strong>
+        </div>
+        ${
+          valueRows.length
+            ? `<div class="dashboard-list">${valueRows.map((row) => `
+                <div class="dashboard-row">
+                  <div><strong>${escapeHtml(row.fixtureLabel)}</strong><span>${escapeHtml(row.label)} - ${marketLabel(row.key)}</span></div>
+                  <b>${decimal(row.odds)}</b>
+                  <em>Model ${pct(row.probability)} / EV ${(row.ev * 100).toFixed(1)}% / Stake ${(row.stake * 100).toFixed(1)}%</em>
+                </div>
+              `).join("")}</div>`
+            : `<div class="empty empty--inline">Live bookmaker odds not yet available.</div>`
+        }
+      </section>
+      <section class="dashboard-card">
+        <div class="dashboard-title">
+          <span>Biggest Price Movements</span>
+          <strong>${movementRows.length ? `${movementRows.length} tracked moves` : "Not yet available"}</strong>
+        </div>
+        ${
+          movementRows.length
+            ? `<div class="dashboard-list">${movementRows.map((row) => `
+                <div class="dashboard-row dashboard-row--compact">
+                  <div><strong>${escapeHtml(row.fixture.home)} v ${escapeHtml(row.fixture.away)}</strong><span>${marketLabel(row.market)}</span></div>
+                  <b>${decimal(row.from)} -> ${decimal(row.to)}</b>
+                  <em>${row.change > 0 ? "Drift" : "Shortened"} ${(Math.abs(row.pctChange) * 100).toFixed(1)}%</em>
+                </div>
+              `).join("")}</div>`
+            : `<div class="empty empty--inline">Needs two live odds refreshes to show movement.</div>`
+        }
+      </section>
+      <section class="dashboard-card">
+        <div class="dashboard-title">
+          <span>Model Accuracy</span>
+          <strong>${backtest.sample ? `${pct(backtest.oneXTwo)} 1X2` : "Not enough data"}</strong>
+        </div>
+        <div class="mini-metrics">
+          <div><span>BTTS</span><strong>${backtest.sample ? pct(backtest.btts) : "-"}</strong></div>
+          <div><span>O/U 2.5</span><strong>${backtest.sample ? pct(backtest.ou25) : "-"}</strong></div>
+          <div><span>Exact</span><strong>${backtest.sample ? pct(backtest.exact) : "-"}</strong></div>
+          <div><span>ROI</span><strong>${backtest.sample ? `${(backtest.valueRoi * 100).toFixed(1)}%` : "-"}</strong></div>
+        </div>
+      </section>
+    </div>
+  `;
 }
 
 function renderValueSummary(key, prediction) {
@@ -880,13 +1604,15 @@ function renderLiveNotes(live) {
 function renderChrome() {
   const config = activeConfig();
   const matchCount = state.matches.length;
+  const realMatchCount = realCompletedMatches().length;
   const week = getActiveGameweek();
   const backtest = predictionBacktest();
   el("competitionEyebrow").textContent = config.eyebrow;
-  el("dataStatus").textContent = state.synthetic ? "Calibration only" : matchCount > 250 ? "Model loaded" : "Needs more data";
-  el("modelStamp").textContent = state.synthetic
-    ? `${week?.fixtures.length || 0} fixtures - draw data pending`
-    : `${matchCount} results - ${week?.fixtures.length || 0} fixtures - ${backtest.sample} backtested`;
+  el("dataStatus").textContent = realMatchCount > 250 ? "Model loaded" : realMatchCount ? "Building record" : "Calibration only";
+  const blendNote = UEFA_BLEND_COMPETITIONS.has(activeCompetitionId) ? " - 70/30 Europe/domestic blend" : "";
+  el("modelStamp").textContent = realMatchCount
+    ? `${realMatchCount} real results - ${week?.fixtures.length || 0} fixtures - ${backtest.sample} backtested${blendNote}`
+    : `${week?.fixtures.length || 0} fixtures - historical record pending${blendNote}`;
   el("activeWeekTitle").textContent = `${config.label} - ${week ? week.name : "Upcoming Game Week"}`;
   el("activeWeekSubtitle").textContent = week
     ? `${formatFixtureDate({ date: week.startDate })} to ${formatFixtureDate({ date: week.endDate })}`
@@ -897,9 +1623,27 @@ function renderChrome() {
   });
 }
 
+function renderView() {
+  document.querySelectorAll(".view-tab").forEach((tab) => {
+    tab.classList.toggle("is-active", tab.dataset.view === activeView);
+  });
+  document.querySelectorAll(".view-panel").forEach((panel) => {
+    panel.classList.toggle("view-panel--active", panel.id === `${activeView}Dashboard` || panel.id === `${activeView}View`);
+  });
+}
+
+function switchView(view) {
+  activeView = view;
+  localStorage.setItem("football-model-active-view", activeView);
+  renderView();
+}
+
 function renderAll() {
   renderChrome();
+  renderView();
+  renderOddsDashboard();
   renderBacktest();
+  renderBacktestDetails();
   renderPredictions();
 }
 
@@ -909,8 +1653,8 @@ function renderBacktest() {
     el("backtestPanel").innerHTML = `
       <div class="backtest-card">
         <span>Backtest</span>
-        <strong>Not enough historical data</strong>
-        <em>Use this tab cautiously until more completed matches are available.</em>
+        <strong>Building historical record</strong>
+        <em>This page starts once at least 80 real completed matches are available for this competition.</em>
       </div>
     `;
     return;
@@ -930,6 +1674,78 @@ function renderBacktest() {
       <div><span>Value bets</span><strong>${backtest.valueBets}</strong></div>
       <div><span>Flat ROI</span><strong>${(backtest.valueRoi * 100).toFixed(1)}%</strong></div>
     </div>
+  `;
+}
+
+function historicalPredictionRows(limit = 30) {
+  const completed = realCompletedMatches();
+  if (completed.length < 80) return [];
+  const teams = activeTeams();
+  const ordered = [...completed]
+    .filter((match) => teams.includes(match.home) && teams.includes(match.away))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const warmup = Math.min(420, Math.floor(ordered.length * 0.55));
+  return ordered.slice(warmup).slice(-limit).map((match, index, sample) => {
+    const matchIndex = ordered.indexOf(match);
+    const prior = ordered.slice(0, matchIndex);
+    const prediction = predictFixture({ date: match.date, home: match.home, away: match.away }, prior, false);
+    const actual = match.hg > match.ag ? "H" : match.hg === match.ag ? "D" : "A";
+    const pick = prediction.homeWin > prediction.draw && prediction.homeWin > prediction.awayWin ? "H" : prediction.draw > prediction.awayWin ? "D" : "A";
+    const pickLabel = pick === "H" ? match.home : pick === "A" ? match.away : "Draw";
+    const bttsWon = (match.hg > 0 && match.ag > 0) === prediction.btts.label.endsWith("Yes");
+    const goalsWon = (match.hg + match.ag > 2.5) === prediction.goals.label.startsWith("Over");
+    return {
+      id: `${match.date}-${match.home}-${match.away}-${index}-${sample.length}`,
+      date: match.date,
+      fixture: `${match.home} v ${match.away}`,
+      score: `${match.hg}-${match.ag}`,
+      pickLabel,
+      won: pick === actual,
+      btts: prediction.btts.label,
+      bttsWon,
+      goals: prediction.goals.label,
+      goalsWon,
+      predictedScore: prediction.score,
+    };
+  }).reverse();
+}
+
+function renderBacktestDetails() {
+  const panel = el("backtestDetails");
+  const rows = historicalPredictionRows(36);
+  if (!rows.length) {
+    panel.innerHTML = `
+      <div class="backtest-history">
+        <div class="empty empty--inline">No settled prediction history yet. This will update automatically once enough real completed matches are available.</div>
+      </div>
+    `;
+    return;
+  }
+  const oneXTwoHit = rows.filter((row) => row.won).length / rows.length;
+  const bttsHit = rows.filter((row) => row.bttsWon).length / rows.length;
+  const goalsHit = rows.filter((row) => row.goalsWon).length / rows.length;
+  panel.innerHTML = `
+    <section class="backtest-history">
+      <div class="history-summary">
+        <div><span>Shown sample</span><strong>${rows.length} matches</strong></div>
+        <div><span>Winner accuracy</span><strong>${pct(oneXTwoHit)}</strong></div>
+        <div><span>BTTS accuracy</span><strong>${pct(bttsHit)}</strong></div>
+        <div><span>O/U 2.5 accuracy</span><strong>${pct(goalsHit)}</strong></div>
+      </div>
+      <div class="history-table">
+        <div class="history-row history-row--head">
+          <span>Match</span><span>Prediction</span><span>Actual</span><span>Markets</span>
+        </div>
+        ${rows.map((row) => `
+          <div class="history-row">
+            <span><strong>${escapeHtml(row.fixture)}</strong><em>${formatFixtureDate({ date: row.date })}</em></span>
+            <span><strong>${escapeHtml(row.pickLabel)}</strong><em>Score ${escapeHtml(row.predictedScore)}</em></span>
+            <span><strong>${escapeHtml(row.score)}</strong><em class="${row.won ? "hit" : "miss"}">${row.won ? "Winner hit" : "Winner missed"}</em></span>
+            <span><em class="${row.bttsWon ? "hit" : "miss"}">${escapeHtml(row.btts)}</em><em class="${row.goalsWon ? "hit" : "miss"}">${escapeHtml(row.goals)}</em></span>
+          </div>
+        `).join("")}
+      </div>
+    </section>
   `;
 }
 
@@ -960,7 +1776,7 @@ function attachOddsListeners() {
         delete state.odds[card.dataset.fixtureKey][event.target.dataset.oddsKey];
       }
       saveState();
-      renderPredictions();
+      renderAll();
     });
   });
 }
@@ -1013,9 +1829,26 @@ function mergeLiveGame(game) {
 
   if (game.odds) {
     if (!state.odds[key]) state.odds[key] = {};
+    const previousOdds = { ...state.odds[key] };
+    const movement = {};
     ["home", "draw", "away", "bttsYes", "bttsNo", "over25", "under25"].forEach((market) => {
-      if (game.odds[market]) state.odds[key][market] = game.odds[market];
+      const nextPrice = Number(game.odds[market]);
+      const previousPrice = Number(previousOdds[market]);
+      if (Number.isFinite(nextPrice) && nextPrice > 1) {
+        if (Number.isFinite(previousPrice) && previousPrice > 1 && Math.abs(previousPrice - nextPrice) >= 0.01) {
+          movement[market] = {
+            from: previousPrice,
+            to: nextPrice,
+            change: nextPrice - previousPrice,
+            pctChange: (nextPrice - previousPrice) / previousPrice,
+            updatedAt: game.oddsUpdatedAt || new Date().toISOString(),
+          };
+        }
+        state.odds[key][market] = nextPrice;
+      }
     });
+    if (Object.keys(movement).length) state.live[key].oddsMovement = { ...(state.live[key].oddsMovement || {}), ...movement };
+    state.live[key].previousOdds = previousOdds;
     state.live[key].oddsUpdatedAt = game.oddsUpdatedAt || new Date().toISOString();
   }
 
@@ -1048,26 +1881,21 @@ async function refreshLiveData() {
     el("liveDataStamp").textContent = payload.providerStatus || "Live data checked";
     el("liveDataSummary").textContent = `${merged} games updated`;
   } catch (error) {
-    el("liveDataStamp").textContent = "Connect provider keys";
-    el("liveDataSummary").textContent = "Deploy API needed";
+    el("liveDataStamp").textContent = "No available data yet";
+    el("liveDataSummary").textContent = "No live data yet";
     console.warn("Live data refresh failed", error);
   }
   renderAll();
 }
 
-function importFiles(files) {
-  [...files].forEach((file) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imported = csvToMatches(String(reader.result));
-      if (imported.length) {
-        state.matches.push(...imported);
-        state.source = "Imported CSV + local updates";
-        saveState();
-        renderAll();
-      }
-    };
-    reader.readAsText(file);
+function startLiveDataMonitor() {
+  if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+  liveRefreshTimer = setInterval(() => {
+    if (document.hidden) return;
+    refreshLiveData();
+  }, 5 * 60 * 1000);
+  if (document.addEventListener) document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshLiveData();
   });
 }
 
@@ -1121,12 +1949,15 @@ function init() {
   el("resetData").addEventListener("click", resetData);
   el("autoRefresh").addEventListener("click", refreshCurrentSeasonResults);
   el("liveRefresh").addEventListener("click", refreshLiveData);
-  el("csvUpload").addEventListener("change", (event) => importFiles(event.target.files));
   document.querySelectorAll(".competition-tab").forEach((tab) => {
     tab.addEventListener("click", () => switchCompetition(tab.dataset.competition));
   });
+  document.querySelectorAll(".view-tab").forEach((tab) => {
+    tab.addEventListener("click", () => switchView(tab.dataset.view));
+  });
   refreshCurrentSeasonResults();
   refreshLiveData();
+  startLiveDataMonitor();
 }
 
 init();
