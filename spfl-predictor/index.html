@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Football Prediction Model</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero__image" aria-hidden="true"></div>
+        <div class="hero__shade" aria-hidden="true"></div>
+        <div class="hero__content">
+          <div class="topbar">
+            <div>
+              <p class="eyebrow" id="competitionEyebrow">SPFL Premiership 2026/27</p>
+              <h1>Prediction Model</h1>
+            </div>
+            <div class="status" id="dataStatus">Preparing model</div>
+          </div>
+          <nav class="competition-tabs" aria-label="Competition selector">
+            <button class="competition-tab is-active" type="button" data-competition="spfl">SPFL</button>
+            <button class="competition-tab" type="button" data-competition="premier-league">Premier League</button>
+            <button class="competition-tab" type="button" data-competition="champions-league">Champions League</button>
+          </nav>
+
+          <div class="control-grid">
+            <section class="panel panel--compact">
+              <div class="panel__head">
+                <h2 id="activeWeekTitle">Upcoming Game Week</h2>
+                <span id="modelStamp">Weighted football model</span>
+              </div>
+              <div class="fixture-controls">
+                <label>
+                  Home
+                  <select id="homeTeam"></select>
+                </label>
+                <label>
+                  Away
+                  <select id="awayTeam"></select>
+                </label>
+                <button id="addFixture" type="button">Add To Week</button>
+              </div>
+              <div class="inline-actions">
+                <button id="autoRefresh" type="button">Refresh Results</button>
+                <label class="file-button">
+                  Import CSV
+                  <input id="csvUpload" type="file" accept=".csv,text/csv" multiple />
+                </label>
+              </div>
+            </section>
+
+            <section class="panel panel--compact">
+              <div class="panel__head">
+                <h2>Auto Updates</h2>
+                <span id="autoUpdateStamp">Checking on open</span>
+              </div>
+              <p class="auto-copy">The model checks the current season results feed when opened, adds new scores, then advances to the next incomplete game week.</p>
+            </section>
+
+            <section class="panel panel--compact panel--wide">
+              <div class="panel__head">
+                <h2>Live Betting Data</h2>
+                <span id="liveDataStamp">Provider not connected</span>
+              </div>
+              <p class="auto-copy">When deployed with API keys, the model pulls live bookmaker odds, starting XIs, team news, and xG/stat feeds for the selected game week.</p>
+              <div class="inline-actions">
+                <button id="liveRefresh" type="button">Refresh Live Data</button>
+                <span class="data-pill" id="liveDataSummary">Needs API keys</span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <section class="mainboard">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Upcoming Predictions</p>
+              <h2 id="activeWeekSubtitle">Predicted scores, markets, and lineup notes</h2>
+            </div>
+            <div class="toolbar">
+              <button id="exportData" type="button">Export Data</button>
+              <button id="resetData" class="ghost" type="button">Reset</button>
+            </div>
+          </div>
+          <div id="backtestPanel" class="backtest-panel"></div>
+          <div id="predictionGrid" class="prediction-grid"></div>
+        </section>
+      </section>
+    </main>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
