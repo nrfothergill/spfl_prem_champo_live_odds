@@ -50,3 +50,4 @@ Model notes:
 - The backtest uses only matches before each tested fixture and reports 1X2, BTTS, O/U 2.5, exact score, Brier score, value-bet count, and flat-stake ROI.
 - Predictions are estimates, not betting advice. No model can guarantee profit.
 Updated deployment
+Updated app text
