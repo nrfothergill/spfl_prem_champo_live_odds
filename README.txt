@@ -1,68 +1,97 @@
-Football 2026/27 Prediction Model
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture IQ</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="competition-drawer" id="competitionDrawer" aria-hidden="true">
+      <div class="drawer-panel">
+        <div class="drawer-head">
+          <div>
+            <p class="eyebrow">Fixture IQ</p>
+            <h2>Explore Model</h2>
+          </div>
+          <button class="drawer-close" id="closeCompetitionMenu" type="button" aria-label="Close competition menu">Close</button>
+        </div>
+        <button class="drawer-performance" id="drawerPerformance" type="button">
+          <strong>Model Performance</strong>
+          <span>Backtesting, calibration, and competition results</span>
+        </button>
+        <p class="drawer-label">Competitions</p>
+        <div class="competition-list" id="competitionList"></div>
+      </div>
+    </aside>
+    <main class="shell">
+      <header class="app-header" id="appHeader" hidden>
+        <button class="secondary-action" id="homeLink" type="button">Fixture IQ</button>
+        <button class="menu-button icon-menu" id="appCompetitionMenu" type="button" aria-label="Open competitions menu">
+          <span></span><span></span><span></span>
+        </button>
+      </header>
 
-Open index.html in a browser to use the dashboard.
+      <section class="hero" id="homePage">
+        <div class="hero__image" aria-hidden="true"></div>
+        <div class="hero__shade" aria-hidden="true"></div>
+        <div class="hero__content">
+          <div class="topbar">
+            <button class="menu-button icon-menu" id="competitionMenu" type="button" aria-label="Open competitions menu">
+              <span></span><span></span><span></span>
+            </button>
+            <h1 class="sr-only">Fixture IQ</h1>
+          </div>
 
-Competition tabs:
-- SPFL Premiership
-- Premier League
-- French Ligue 1
-- German Bundesliga
-- Spanish La Liga
-- Italian Serie A
-- Portuguese Primeira Liga
-- UEFA Champions League
-- UEFA Europa League
-- UEFA Conference League
+          <div class="logo-stage">
+            <img src="assets/fixture-iq-logo.png" alt="Fixture IQ - Smarter Predictions. Better Decisions." />
+          </div>
 
-Live data setup:
-- Deploy as a Vercel project, not only a static drop, if you want live odds/lineups/xG.
-- Add these Vercel environment variables:
-  - ODDS_API_KEY: key from The Odds API.
-  - API_FOOTBALL_KEY: key from API-Football/API-Sports.
-  - ODDS_REGIONS: optional, defaults to uk,eu.
-- The browser calls /api/live-data?competition=... and the API route keeps provider keys server-side.
-- Live odds are mapped into the value engine automatically.
-- Starting XIs are pasted into the lineup model automatically when the provider has confirmed lineups.
-- xG/stat feeds are blended into expected goals when available.
-- The page checks live data on open, when Refresh Live Data is pressed, every five minutes while open, and when the browser tab becomes active again.
-- The API route requests live odds plus upcoming/live fixture context so odds movements and starting XIs appear as soon as the providers publish them.
+          <div class="home-hero">
+            <p class="hero-copy">Fixture IQ converts historical results, form, market movement, expected goals and lineup information into clear football predictions across major domestic and European competitions.</p>
+            <div class="trust-strip">
+              <div><strong id="coverageCount">10</strong><span>competitions</span></div>
+              <div><strong id="testedCount">0</strong><span>matches tested</span></div>
+              <div><strong id="topAccuracy">--</strong><span>best rolling hit rate</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-Bundled data:
-- Scottish Premiership SC0 CSV results from Football-Data, seasons 2016/17 through 2025/26.
-- Premier League E0 CSV results from Football-Data, seasons 2016/17 through 2025/26.
-- Ligue 1 F1, Bundesliga D1, La Liga SP1, Serie A I1, and Primeira Liga P1 CSV results from Football-Data, seasons 2016/17 through 2025/26.
-- Champions League, Europa League, and Conference League tabs use editable league-phase teams and placeholder fixtures until the UEFA draws are published; UEFA historical backtest records are not bundled from Football-Data.
-- Bundled match counts: 2,231 SPFL, 3,800 Premier League, 3,477 Ligue 1, 3,060 Bundesliga, 3,800 La Liga, 3,800 Serie A, and 3,060 Primeira Liga results.
-- Champions League, Europa League, and Conference League predictions use a 70% European-context model and a 30% domestic-league club data blend.
+      <section class="home-performance" id="performancePage" hidden>
+        <div id="homeModelPerformance"></div>
+      </section>
 
-Weekly update flow:
-1. The dashboard opens on the odds movement and value-bet screen for the active upcoming game week.
-2. The page checks the selected competition's current-season Football-Data CSV feed when opened and when Refresh Results is pressed, where a feed is available.
-3. New results are merged automatically, then the dashboard moves to the next incomplete game week.
-4. Export Data to save the current model state.
-
-Dashboard pages:
-- Odds Dashboard: biggest tracked price moves, best model value bets, and quick accuracy stats.
-- Predictions: predicted scores, 1X2, double chance, BTTS, over/under 2.5 goals, odds input, value flag, and lineup notes.
-- Backtest: recent settled historical predictions with winner, BTTS, over/under hit checks, plus overall rolling accuracy. New leagues begin showing backtest records once enough real completed matches are available.
-
-Prediction markets:
-- Predicted score
-- Winner
-- Double chance
-- BTTS
-- Over/under 2.5 goals
-- Lineup-adjusted expected goals
-- Manual bookmaker odds input
-- Live bookmaker odds integration through /api/live-data
-- Value/edge flag
-- Biggest price movement tracker after repeated live odds refreshes
-- Market-implied probability blending when live or manual odds are available
-- Conservative quarter-Kelly staking guide
-- Rolling backtest metrics
-
-Model notes:
-- Weighted recency, attack/defence strength, Elo-style ratings, club priors, recent head-to-head, home advantage, form, bookmaker closing odds for historical analysis, and Poisson goal probabilities.
-- Lineup boxes accept starting XI, injury, suspension, rotation, and availability notes. Those notes adjust each team's attacking expectation.
-- The backtest uses only matches before each tested fixture and reports 1X2, BTTS, O/U 2.5, exact score, Brier score, value-bet count, and flat-stake ROI.
-- Predictions are estimates, not betting advice. No model can guarantee profit.
+      <section class="workspace" id="leagueWorkspace" hidden>
+        <section class="mainboard">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">League Workspace</p>
+              <h2 id="activeWeekSubtitle">Select a competition to view dashboard, predictions, and backtest</h2>
+            </div>
+            <div class="toolbar">
+              <button id="liveRefresh" type="button">Update Market Data</button>
+              <button id="exportData" type="button">Export Data</button>
+              <button id="resetData" class="ghost" type="button">Reset</button>
+            </div>
+          </div>
+          <nav class="view-tabs" aria-label="Dashboard views">
+            <button class="view-tab" type="button" data-view="odds">Odds Dashboard</button>
+            <button class="view-tab" type="button" data-view="predictions">Predictions</button>
+            <button class="view-tab" type="button" data-view="backtest">Backtest</button>
+          </nav>
+          <section id="oddsDashboard" class="view-panel view-panel--active"></section>
+          <section id="predictionsView" class="view-panel">
+            <div id="predictionGrid" class="prediction-grid"></div>
+          </section>
+          <section id="backtestView" class="view-panel">
+            <div id="backtestPanel" class="backtest-panel"></div>
+            <div id="backtestDetails" class="backtest-details"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
