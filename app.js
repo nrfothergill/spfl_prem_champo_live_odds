@@ -7,6 +7,26 @@ const MODEL_SETTINGS = {
 };
 const FIXTURE_SCHEMA_VERSION = 51;
 
+const EUROPEAN_QUALIFIER_PRIORS = {
+  Kairat: 0.96, "Sutjeska Niksic": 0.78, "Tallinna Flora": 0.8, "Flora Tallinn": 0.8, "Iberia 1999": 0.86,
+  "Iberia Tbilisi": 0.86, "Petrocub Hincesti": 0.91, "Egnatia Rrogozhine": 0.89, "Maxline Vitebsk": 0.84,
+  "Universitatea Craiova": 1.06, "KuPS Kuopio": 0.96, Vardar: 0.86, Riga: 0.97, "Ararat-Armenia": 0.95,
+  "Gyori ETO": 1.01, "Vikingur Reykjavik": 0.98, "The New Saints": 0.9, Sabah: 1.01, "Levski Sofia": 1.04,
+  Borac: 0.99, "Inter Escaldes": 0.75, "Lincoln Red Imps": 0.8, Drita: 0.85, "Kauno Zalgiris": 0.87,
+  "Shamrock Rovers": 1.01, Floriana: 0.81, Larne: 0.9, "Tre Fiori": 0.66, "Atert Bissen": 0.64, Klaksvik: 0.96,
+  Qarabag: 1.28, Vestri: 0.68, "Dynamo Kyiv": 1.2, "Universitatea Cluj": 1.02, Sheriff: 1.08, Aluminij: 0.84,
+  "CSKA Sofia": 1.08, "Derry City": 0.96, "Hajduk Split": 1.16, Zilina: 1.02, Vojvodina: 1.06, Ferencvaros: 1.2,
+  "Atletic Club d'Escaldes": 0.7, Mornar: 0.9, Alashkert: 0.96, Elimai: 0.89, Dila: 0.95, Virtus: 0.64,
+  Hegelmann: 0.87, Paide: 0.96, Kalju: 0.92, Linfield: 0.99, Liepaja: 0.9, Decic: 0.88,
+  Bohemians: 1.04, "St Joseph's": 0.7, "Dinamo-Minsk": 1.05, Sileks: 0.87, Marsaxlokk: 0.74, Pyunik: 1.02,
+  Velez: 0.97, Milsami: 0.9, Mondorf: 0.77, "Dinamo Tbilisi": 0.97, Caernarfon: 0.81, "Levadia Tallinn": 1,
+  Europa: 0.7, Shkendija: 1, Vllaznia: 0.95, Malisheva: 0.87, Stjarnan: 0.99, Vikingur: 1.03,
+  Glentoran: 0.94, RFS: 1.11, Penybont: 0.83, "FC Santa Coloma": 0.76, Petrovac: 0.88, Zalgiris: 0.97,
+  Runavik: 0.81, "Hamrun Spartans": 0.97, "Dinamo City": 0.95, Astana: 1.13, Sarajevo: 1.05, "Inter Turku": 0.94,
+  "La Fiorita": 0.64, "UNA Strassen": 0.86, Ilves: 0.97, Differdange: 0.91, "Torpedo Kutaisi": 0.97, Zire: 0.99,
+  BATE: 1.03, Elbasani: 0.89, Ballkani: 1.01, "Connah's Quay": 0.82,
+};
+
 const FORMATIONS = {
   "4-3-3": ["GK", "RB", "RCB", "LCB", "LB", "RCM", "CM", "LCM", "RW", "ST", "LW"],
   "4-2-3-1": ["GK", "RB", "RCB", "LCB", "LB", "RDM", "LDM", "RW", "CAM", "LW", "ST"],
@@ -1638,11 +1658,12 @@ function buildTeamModel(matches = state.matches) {
     const time = new Date(match.date).getTime();
     return Number.isFinite(time) ? Math.max(latest, time) : latest;
   }, 0);
-  const allTeamNames = [...new Set([...activeTeams(), ...matches.flatMap((match) => [match.home, match.away])])];
+  const fixtureTeams = (state.gameweeks || []).flatMap((week) => week.fixtures.flatMap((fixture) => [fixture.home, fixture.away]));
+  const allTeamNames = [...new Set([...activeTeams(), ...fixtureTeams, ...matches.flatMap((match) => [match.home, match.away])])];
   const priors = activeConfig().priors || {};
   const team = Object.fromEntries(
     allTeamNames.map((name) => {
-      const prior = priors[name] || 1;
+      const prior = EUROPEAN_QUALIFIER_PRIORS[name] || priors[name] || 1;
       return [name, { played: 0, attackFor: 0, attackAgainst: 0, elo: 1500 + (prior - 1) * 260, recent: [], prior }];
     }),
   );
@@ -1789,6 +1810,14 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
     0.15,
     3.4,
   );
+  const lowDataReliability = clamp(1 - Math.min(Number(h.played || 0), Number(a.played || 0)) / 8, 0, 1);
+  if (lowDataReliability > 0 && h.prior > 0 && a.prior > 0) {
+    const priorEdge = clamp(Math.log(h.prior / a.prior), -0.7, 0.7) * lowDataReliability;
+    homeLambda = clamp(homeLambda * Math.exp(priorEdge * 0.85), 0.2, 3.8);
+    awayLambda = clamp(awayLambda * Math.exp(-priorEdge * 0.85), 0.15, 3.4);
+  }
+  homeLambda = clamp(homeLambda * 1.35, 0.2, 3.8);
+  awayLambda = clamp(awayLambda * 1.35, 0.15, 3.4);
   if (liveXg && Number.isFinite(Number(liveXg.home)) && Number.isFinite(Number(liveXg.away))) {
     homeLambda = clamp(homeLambda * 0.72 + Number(liveXg.home) * 0.28, 0.2, 3.8);
     awayLambda = clamp(awayLambda * 0.72 + Number(liveXg.away) * 0.28, 0.15, 3.4);
@@ -1838,6 +1867,16 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
     if (cell.hg + cell.ag > 2.5) over25 += p;
     if (p > bestScore.value) bestScore = { home: cell.hg, away: cell.ag, value: p };
   });
+  const calibratedHomeGoals = clamp(Math.floor(homeLambda + 0.25), 0, 8);
+  const calibratedAwayGoals = clamp(Math.floor(awayLambda + 0.25), 0, 8);
+  const calibratedCell = scoreCells.find((cell) => cell.hg === calibratedHomeGoals && cell.ag === calibratedAwayGoals);
+  if (calibratedCell) {
+    bestScore = {
+      home: calibratedHomeGoals,
+      away: calibratedAwayGoals,
+      value: calibratedCell.value / scoreTotal,
+    };
+  }
   let goalLineOffset = 0;
 
   draw = clamp(draw * (1 + MODEL_SETTINGS.drawTune), 0.04, 0.42);
