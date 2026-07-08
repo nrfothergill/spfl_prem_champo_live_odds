@@ -227,8 +227,13 @@ button:hover {
   text-align: left;
 }
 
-.drawer-performance:hover {
+.drawer-performance:hover,
+.drawer-performance.is-active {
   background: var(--green-dark);
+}
+
+.drawer-today {
+  margin-top: -10px;
 }
 
 .drawer-performance strong,
@@ -536,6 +541,8 @@ label {
 
 select,
 input[type="number"],
+input[type="url"],
+input[type="text"],
 textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -546,7 +553,9 @@ textarea {
 }
 
 select,
-input[type="number"] {
+input[type="number"],
+input[type="url"],
+input[type="text"] {
   min-height: 42px;
   padding: 0 10px;
 }
@@ -1050,6 +1059,100 @@ textarea {
   box-shadow: 0 12px 30px rgba(14, 32, 26, 0.07);
 }
 
+.fixture-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.fixture-details {
+  display: block;
+}
+
+.fixture-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.fixture-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fixture-summary::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--blue);
+  border-bottom: 2px solid var(--blue);
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.fixture-details[open] .fixture-summary::after {
+  transform: rotate(225deg);
+}
+
+.fixture-summary div {
+  min-width: 0;
+}
+
+.fixture-summary span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.fixture-summary strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.fixture-summary b {
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #eef8ff;
+  color: var(--blue);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.fixture-body {
+  border-top: 1px solid var(--line);
+  padding: 16px;
+}
+
+.prediction-updated {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #f7fbff;
+}
+
+.prediction-updated span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.prediction-updated strong {
+  color: var(--blue);
+  font-size: 0.86rem;
+}
+
 .matchline {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -1166,6 +1269,25 @@ textarea {
   background: #fbfcfb;
 }
 
+.source-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 14px;
+  padding: 12px;
+  background: #f7fbff;
+}
+
+.source-status {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #edf3ef;
+  color: var(--green-dark);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
 .odds-head {
   display: flex;
   align-items: center;
@@ -1185,13 +1307,62 @@ textarea {
   gap: 8px;
 }
 
-.odds-grid input {
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.odds-grid input,
+.source-grid input {
   width: 100%;
   min-height: 38px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 8px;
   font-weight: 800;
+}
+
+.source-notes {
+  display: block;
+  margin-top: 10px;
+}
+
+.source-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.source-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.source-actions button {
+  min-height: 38px;
+  padding: 0 14px;
+  background: var(--blue);
+}
+
+.source-actions button:hover {
+  background: #075da0;
+}
+
+.source-links a {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--blue);
+  background: white;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .value-summary {
@@ -1308,6 +1479,7 @@ textarea {
   .performance-metrics,
   .trend-grid,
   .odds-grid,
+  .source-grid,
   .live-notes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1343,6 +1515,7 @@ textarea {
   .trend-grid,
   .trust-strip,
   .odds-grid,
+  .source-grid,
   .live-notes {
     grid-template-columns: 1fr;
   }

@@ -30,14 +30,23 @@ const COMPETITIONS = {
   "champions-league": {
     oddsKeys: ["soccer_uefa_champs_league"],
     apiFootballLeague: 2,
+    qualificationWindows: [["2026-07-07", "2026-07-09"]],
+    officialFixtureSource: "UEFA.com",
+    trustApiFootballFixtures: false,
   },
   "europa-league": {
     oddsKeys: ["soccer_uefa_europa_league"],
     apiFootballLeague: 3,
+    qualificationWindows: [["2026-07-09", "2026-07-09"]],
+    officialFixtureSource: "UEFA.com",
+    trustApiFootballFixtures: false,
   },
   "conference-league": {
     oddsKeys: ["soccer_uefa_europa_conference_league"],
     apiFootballLeague: 848,
+    qualificationWindows: [["2026-07-09", "2026-07-09"]],
+    officialFixtureSource: "UEFA.com",
+    trustApiFootballFixtures: false,
   },
 };
 
@@ -66,10 +75,33 @@ function marketPrice(bookmakers, marketKey, outcomeName) {
   return Number((prices.reduce((sum, value) => sum + value, 0) / prices.length).toFixed(3));
 }
 
+function ukDateTime(value) {
+  if (!value) return { date: null, time: null };
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return { date: null, time: null };
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(parsed);
+  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return {
+    date: `${lookup.year}-${lookup.month}-${lookup.day}`,
+    time: `${lookup.hour}:${lookup.minute}`,
+  };
+}
+
 function parseOddsApiGame(game) {
+  const uk = ukDateTime(game.commence_time);
   return {
     home: game.home_team,
     away: game.away_team,
+    date: uk.date,
+    time: uk.time,
     oddsUpdatedAt: game.bookmakers?.[0]?.last_update,
     odds: {
       home: marketPrice(game.bookmakers, "h2h", game.home_team),
@@ -140,9 +172,12 @@ async function fetchFixtureContext(competition, fixtureParams) {
     const awayLineup = lineups?.response?.find((entry) => normalName(entry.team?.name).includes(normalName(away)));
     const homeXg = statValue(stats?.response, home, ["expected goals", "xg"]);
     const awayXg = statValue(stats?.response, away, ["expected goals", "xg"]);
+    const uk = ukDateTime(fixture.fixture?.date);
     games.push({
       home,
       away,
+      date: uk.date,
+      time: uk.time,
       lineups: {
         home: lineupText(homeLineup),
         away: lineupText(awayLineup),
@@ -157,7 +192,15 @@ async function fetchFixtureContext(competition, fixtureParams) {
 }
 
 async function fetchFixtureContexts(competition) {
-  const [upcoming, live] = await Promise.all([
+  const qualificationRequests = (competition.qualificationWindows || []).map(([from, to]) =>
+    fetchFixtureContext(competition, {
+      league: competition.apiFootballLeague,
+      season: "2026",
+      from,
+      to,
+    }).catch(() => []),
+  );
+  const [upcoming, live, ...qualification] = await Promise.all([
     fetchFixtureContext(competition, {
       league: competition.apiFootballLeague,
       season: "2026",
@@ -168,8 +211,9 @@ async function fetchFixtureContexts(competition) {
       season: "2026",
       live: "all",
     }).catch(() => []),
+    ...qualificationRequests,
   ]);
-  return mergeGames(upcoming, live);
+  return mergeGames(upcoming, live, ...qualification);
 }
 
 function mergeGames(...groups) {
@@ -191,13 +235,18 @@ export default async function handler(request, response) {
 
   const [oddsGames, contextGames] = await Promise.all([
     fetchOdds(competition).catch(() => []),
-    fetchFixtureContexts(competition).catch(() => []),
+    competition.trustApiFootballFixtures === false ? [] : fetchFixtureContexts(competition).catch(() => []),
   ]);
   response.setHeader("Cache-Control", "no-store, max-age=0");
   response.status(200).json({
     providerStatus: [
+      competition.officialFixtureSource ? `Fixtures locked to ${competition.officialFixtureSource}` : "Fixture feed active",
       process.env.ODDS_API_KEY ? "Odds connected" : "Odds key missing",
-      process.env.API_FOOTBALL_KEY ? "Lineups/xG connected" : "Football API key missing",
+      competition.trustApiFootballFixtures === false
+        ? "Third-party fixtures blocked for UEFA"
+        : process.env.API_FOOTBALL_KEY
+          ? "Lineups/xG connected"
+          : "Football API key missing",
     ].join(" / "),
     games: mergeGames(oddsGames, contextGames),
   });

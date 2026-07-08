@@ -3,6 +3,7 @@ Fixture IQ
 Open index.html in a browser to use Fixture IQ.
 
 Competition tabs:
+- Today's Matches from the sidebar combines all fixtures dated today across every competition.
 - SPFL Premiership
 - Premier League
 - French Ligue 1
@@ -22,11 +23,13 @@ Live data setup:
   - ODDS_REGIONS: optional, defaults to uk,eu.
   - EXTRA_ODDS_MARKETS: optional, use totals_corners or any extra market keys your odds provider supports.
 - The browser calls /api/live-data?competition=... and the API route keeps provider keys server-side.
+- UEFA Champions League, Europa League, and Conference League fixtures are locked to the verified UEFA.com fixture list bundled in the site. Third-party fixture APIs are blocked from creating UEFA fixtures because they can publish incorrect qualifying ties.
 - Live odds are mapped into the value engine automatically, including extra markets when the provider supplies them.
 - Starting XIs are pasted into the lineup model automatically when the provider has confirmed lineups.
 - xG/stat feeds are blended into expected goals when available.
 - The page checks live data on open, when Refresh Live Data is pressed, every five minutes while open, and when the browser tab becomes active again.
 - The API route requests live odds plus upcoming/live fixture context so odds movements and starting XIs appear as soon as the providers publish them.
+- Today's Matches checks every supported competition feed and merges matching live odds, lineups, and provider fixtures into the combined daily view.
 
 Bundled data:
 - Scottish Premiership SC0 CSV results from Football-Data, seasons 2016/17 through 2025/26.
@@ -45,9 +48,18 @@ Weekly update flow:
 4. Export Data to save the current model state.
 
 Dashboard pages:
+- Today's Matches: a combined daily workspace using the same odds dashboard, prediction cards, and markets as competition pages.
 - Model Performance: total tested matches, date range, accuracy/calibration metrics, performance over time, and results by competition.
 - Odds Dashboard: recommended bets, recommended bet builders, recommended accumulators, biggest tracked price moves, model likelihood versus implied odds, and quick accuracy stats.
 - Predictions: predicted scores, 1X2, double chance, BTTS, over/under 2.5 goals, corners over/under, player booked, player fouled thresholds, player shots thresholds, player shots-on-target thresholds, player to score, odds input, value flag, and lineup notes.
+- Each prediction card opens as a foldable fixture row. Press the arrow to reveal the full prediction, odds, lineups, and research inputs.
+- Each prediction card includes Source Links for lineups, odds, and a broad stats URL for xG, shots, corners, cards, fouls, and other match data, plus research notes. These links are saved per fixture so manual research can be combined with lineup notes and bookmaker odds without needing a paid all-in-one data API.
+- Press Update prediction in the research inputs panel after adding notes or links to refresh the model output, recommended bets, bet builder, and accumulator with the latest saved research.
+- Odds and stats source links are saved per fixture. When deployed on Vercel, pressing Update prediction tries to read those URLs through /api/source-scan, parse decimal or fractional bookmaker odds, and detect useful stats context. Some bookmaker pages block automated reading; if that happens, a pop-up warning appears, the link is still saved, and manual odds boxes remain available.
+- Visible odds in the dashboard and value summaries are shown in UK bookmaker fractional style, such as 6/4 or 11/10.
+- Opened prediction cards show when the model was last updated for that fixture in UK time.
+- Goal and corner markets now show the strongest practical over/under line rather than always using over/under 2.5 goals and over/under 9.5 corners. Goals choose between 2.5 and 3.5; corners choose between 8.5, 9.5, and 10.5 when corner odds or corner research is available.
+- Corner recommendations only show when corner odds are entered or the research notes include corner/stat context. Otherwise the corner market stays "Not yet available" and is excluded from recommended bets.
 - Backtest: recent settled historical predictions with winner, BTTS, over/under hit checks, plus overall rolling accuracy. New leagues begin showing backtest records once enough real completed matches are available.
 
 Prediction markets:
@@ -71,6 +83,9 @@ Prediction markets:
 - Conservative quarter-Kelly staking guide
 - Rolling backtest metrics
 - Bet builder and accumulator recommendations prioritise the highest combined model probability, then improve the ranking when live odds show positive value.
+- UEFA Champions League, Europa League, and Conference League use live-provider qualification windows so exact qualifying fixtures can be inserted into the competition tab and Today's Matches when published.
+- Fixture kickoff times are displayed in UK time. The Champions League first qualifying round fixtures for 8 July 2026 are bundled into the Champions League tab and Today's Matches as a fallback while live provider data updates.
+- For a more reliable replacement, use a licensed data provider such as Sportradar, Stats Perform/Opta, Sportmonks, or Betfair Exchange API. BBC Sport and Paddy Power website pages are not stable public APIs and should not be scraped for production data.
 
 Model notes:
 - Weighted recency, attack/defence strength, Elo-style ratings, club priors, recent head-to-head, home advantage, form, bookmaker closing odds for historical analysis, and Poisson goal probabilities.

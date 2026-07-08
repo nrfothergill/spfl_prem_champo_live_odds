@@ -573,6 +573,18 @@ const COMPETITIONS = {
     },
     gameweeks: [
       {
+        id: 0,
+        name: "First Qualifying Round - First Legs",
+        startDate: "2026-07-08",
+        endDate: "2026-07-08",
+        fixtures: [
+          { date: "2026-07-08", time: "16:00", home: "Kairat", away: "Sutjeska Niksic" },
+          { date: "2026-07-08", time: "17:00", home: "Tallinna Flora", away: "Iberia 1999" },
+          { date: "2026-07-08", time: "18:00", home: "Petrocub Hincesti", away: "Egnatia Rrogozhine" },
+          { date: "2026-07-08", time: "18:00", home: "Maxline Vitebsk", away: "Universitatea Craiova" },
+        ],
+      },
+      {
         id: 1,
         name: "League Phase Matchday 1",
         startDate: "2026-09-08",
@@ -589,7 +601,7 @@ const COMPETITIONS = {
         ],
       },
     ],
-    note: "Fixture draw pending. Replace these placeholder league-phase fixtures after UEFA publishes the draw.",
+    note: "Qualification fixtures are pulled from the live provider so the exact UEFA draw is used.",
   },
   "europa-league": {
     label: "Europa League",
@@ -654,6 +666,13 @@ const COMPETITIONS = {
     },
     gameweeks: [
       {
+        id: 0,
+        name: "First Qualifying Round - Live Fixtures",
+        startDate: "2026-07-09",
+        endDate: "2026-07-09",
+        fixtures: [],
+      },
+      {
         id: 1,
         name: "League Phase Matchday 1",
         startDate: "2026-09-24",
@@ -670,7 +689,7 @@ const COMPETITIONS = {
         ],
       },
     ],
-    note: "Fixture draw pending. Replace these placeholder league-phase fixtures after UEFA publishes the draw.",
+    note: "Qualification fixtures are pulled from the live provider so the exact UEFA draw is used.",
   },
   "conference-league": {
     label: "Conference League",
@@ -735,6 +754,13 @@ const COMPETITIONS = {
     },
     gameweeks: [
       {
+        id: 0,
+        name: "First Qualifying Round - Live Fixtures",
+        startDate: "2026-07-09",
+        endDate: "2026-07-09",
+        fixtures: [],
+      },
+      {
         id: 1,
         name: "League Phase Matchday 1",
         startDate: "2026-10-01",
@@ -751,7 +777,7 @@ const COMPETITIONS = {
         ],
       },
     ],
-    note: "Fixture draw pending. Replace these placeholder league-phase fixtures after UEFA publishes the draw.",
+    note: "Qualification fixtures are pulled from the live provider so the exact UEFA draw is used.",
   },
 };
 
@@ -759,17 +785,68 @@ let activeCompetitionId = localStorage.getItem("football-model-active-competitio
 let hasSelectedCompetition = localStorage.getItem("football-model-has-selected-competition") === "true";
 let activePage = "home";
 let activeView = localStorage.getItem("football-model-active-view-v2") || "performance";
-let state = createInitialState(activeCompetitionId);
+let state;
 let lineupRenderTimer;
 let backtestCache = {};
 let performanceSummaryCache = null;
 let liveRefreshTimer;
 
 const el = (id) => document.getElementById(id);
-const activeConfig = () => COMPETITIONS[activeCompetitionId];
-const activeTeams = () => activeConfig().teams;
+const TODAYS_MATCHES_ID = "todays-matches";
+const todayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 const competitionIds = () => Object.keys(COMPETITIONS);
+function fixturesForDate(date) {
+  return competitionIds().flatMap((competitionId) =>
+    COMPETITIONS[competitionId].gameweeks.flatMap((week) =>
+      week.fixtures
+        .filter((fixture) => fixture.date === date)
+        .map((fixture) => ({
+          ...fixture,
+          competitionId,
+          competitionLabel: COMPETITIONS[competitionId].label,
+          sourceWeek: week.name,
+        })),
+    ),
+  );
+}
+
+function todayCompetitionConfig() {
+  const today = todayDateString();
+  const fixtures = fixturesForDate(today).sort((a, b) => String(a.time || "").localeCompare(String(b.time || "")));
+  const teams = [...new Set(fixtures.flatMap((fixture) => [fixture.home, fixture.away]))];
+  return {
+    label: "Today's Matches",
+    eyebrow: "All competitions today",
+    storageKey: "football-model-todays-matches-v2",
+    currentSeasonUrl: "",
+    liveProvider: null,
+    teams,
+    priors: {},
+    gameweeks: [
+      {
+        id: 1,
+        name: "Today's Matches",
+        startDate: today,
+        endDate: today,
+        fixtures,
+      },
+    ],
+    note: "Combined view of fixtures scheduled today across every competition.",
+  };
+}
+
+const activeConfig = () => (activeCompetitionId === TODAYS_MATCHES_ID ? todayCompetitionConfig() : COMPETITIONS[activeCompetitionId]);
+const activeTeams = () => activeConfig().teams;
 const performanceCompetitionIds = () => competitionIds().filter((id) => bundledMatches(id).filter((match) => !match.synthetic).length >= 80);
+
+if (!COMPETITIONS[activeCompetitionId] && activeCompetitionId !== TODAYS_MATCHES_ID) activeCompetitionId = "spfl";
+state = createInitialState(activeCompetitionId);
 
 function normalizeTeam(name) {
   const clean = String(name || "").trim();
@@ -777,25 +854,28 @@ function normalizeTeam(name) {
 }
 
 function cloneGameweeks(competitionId) {
-  return COMPETITIONS[competitionId].gameweeks.map((week) => ({
+  const config = competitionId === TODAYS_MATCHES_ID ? todayCompetitionConfig() : COMPETITIONS[competitionId];
+  return config.gameweeks.map((week) => ({
     ...week,
     fixtures: week.fixtures.map((fixture) => ({ ...fixture })),
   }));
 }
 
 function bundledMatches(competitionId) {
+  if (competitionId === TODAYS_MATCHES_ID) return [];
   return window.COMPETITION_BUNDLED_MATCHES?.[competitionId] || window.SPFL_BUNDLED_MATCHES || [];
 }
 
 function createInitialState(competitionId) {
-  const config = COMPETITIONS[competitionId];
-  const matches = bundledMatches(competitionId);
+  const config = competitionId === TODAYS_MATCHES_ID ? todayCompetitionConfig() : COMPETITIONS[competitionId] || COMPETITIONS.spfl;
+  const matches = competitionId === TODAYS_MATCHES_ID ? [] : bundledMatches(competitionId);
   return {
     matches: matches.length ? matches : buildFallbackMatches(competitionId),
     gameweeks: cloneGameweeks(competitionId),
     currentGameweek: 0,
     lineups: {},
     odds: {},
+    sourceLinks: {},
     live: {},
     source: matches.length ? "Bundled Football-Data CSV archive" : "Fallback calibration",
     synthetic: !matches.length,
@@ -816,6 +896,27 @@ function pct(value) {
 function decimal(value) {
   const num = Number(value);
   return Number.isFinite(num) ? num.toFixed(2) : "-";
+}
+
+function gcd(a, b) {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) {
+    const next = x % y;
+    x = y;
+    y = next;
+  }
+  return x || 1;
+}
+
+function decimalToFractional(value) {
+  const decimalOdds = Number(value);
+  if (!Number.isFinite(decimalOdds) || decimalOdds <= 1) return "Odds pending";
+  const profit = decimalOdds - 1;
+  const denominator = 100;
+  const numerator = Math.round(profit * denominator);
+  const divisor = gcd(numerator, denominator);
+  return `${numerator / divisor}/${denominator / divisor}`;
 }
 
 function impliedProbability(odds) {
@@ -850,6 +951,26 @@ function poisson(lambda, goals) {
   return (Math.exp(-lambda) * Math.pow(lambda, goals)) / factorial;
 }
 
+function poissonOverProbability(lambda, line) {
+  let underOrEqual = 0;
+  for (let goals = 0; goals <= Math.floor(line); goals += 1) {
+    underOrEqual += poisson(lambda, goals);
+  }
+  return clamp(1 - underOrEqual, 0.01, 0.99);
+}
+
+function bestOverUnderLine(lines, probabilityForOver, labelSuffix = "") {
+  return lines
+    .flatMap((line) => {
+      const over = clamp(probabilityForOver(line), 0.01, 0.99);
+      return [
+        { label: `Over ${line}${labelSuffix}`, value: over, line, side: "over" },
+        { label: `Under ${line}${labelSuffix}`, value: 1 - over, line, side: "under" },
+      ];
+    })
+    .sort((a, b) => b.value - a.value)[0];
+}
+
 function parseDate(value) {
   if (!value) return null;
   const [year, month, day] = String(value).slice(0, 10).split("-").map(Number);
@@ -861,11 +982,43 @@ function formatFixtureDate(fixture) {
   const date = parseDate(fixture.date);
   if (!date) return "TBC";
   const day = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-  return fixture.time ? `${day}, ${fixture.time}` : day;
+  return fixture.time ? `${day}, ${fixture.time} UK` : day;
+}
+
+function formatUpdateTime(value) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "Not yet updated";
+  return date.toLocaleString("en-GB", {
+    timeZone: "Europe/London",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function predictionUpdatedAt(key) {
+  const live = state.live?.[key] || {};
+  const dates = [
+    state.updatedAt,
+    live.oddsUpdatedAt,
+    live.lineupsUpdatedAt,
+    live.xgUpdatedAt,
+  ]
+    .map((value) => (value ? new Date(value).getTime() : NaN))
+    .filter(Number.isFinite);
+  return dates.length ? new Date(Math.max(...dates)).toISOString() : "";
+}
+
+function overUnderWon(label, total) {
+  const match = String(label || "").match(/^(Over|Under)\s+([0-9.]+)/i);
+  if (!match) return false;
+  const line = Number(match[2]);
+  return match[1].toLowerCase() === "over" ? total > line : total < line;
 }
 
 function fixtureKey(fixture) {
-  return [activeCompetitionId, fixture.date || "tbc", fixture.home, fixture.away].join("|");
+  return [fixture.competitionId || activeCompetitionId, fixture.date || "tbc", fixture.home, fixture.away].join("|");
 }
 
 function escapeHtml(value) {
@@ -878,6 +1031,87 @@ function escapeHtml(value) {
 
 function getLineup(fixture, side) {
   return state.lineups?.[fixtureKey(fixture)]?.[side] || "";
+}
+
+function getSourceLinks(fixture) {
+  return state.sourceLinks?.[fixtureKey(fixture)] || {};
+}
+
+function safeSourceUrl(value) {
+  const text = String(value || "").trim();
+  return /^https?:\/\//i.test(text) ? text : "";
+}
+
+function regexEscape(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function findFixtureByKey(key) {
+  for (const week of state.gameweeks || []) {
+    for (const fixture of week.fixtures || []) {
+      if (fixtureKey(fixture) === key) return fixture;
+    }
+  }
+  return null;
+}
+
+function extractDecimalNear(text, labels) {
+  const source = String(text || "");
+  const parsePrice = (value) => {
+    const raw = String(value || "").trim();
+    const fraction = raw.match(/^(\d{1,3})\/(\d{1,3})$/);
+    if (fraction) {
+      const top = Number(fraction[1]);
+      const bottom = Number(fraction[2]);
+      return bottom > 0 ? 1 + top / bottom : null;
+    }
+    return Number(raw);
+  };
+  for (const label of labels.filter(Boolean)) {
+    const escaped = regexEscape(label);
+    const pricePattern = "(\\d{1,3}\\/\\d{1,3}|[1-9][0-9]?(?:\\.\\d{1,3})?)";
+    const after = source.match(new RegExp(`${escaped}[^0-9/]{0,40}${pricePattern}`, "i"));
+    if (after) return parsePrice(after[1]);
+    const before = source.match(new RegExp(`${pricePattern}[^A-Za-z0-9/]{0,24}${escaped}`, "i"));
+    if (before) return parsePrice(before[1]);
+  }
+  return null;
+}
+
+function oddsFromResearchNotes(text, fixture) {
+  if (!fixture) return {};
+  const markets = [
+    { key: "home", labels: [fixture.home, "home win", "home"] },
+    { key: "draw", labels: ["draw", "x"] },
+    { key: "away", labels: [fixture.away, "away win", "away"] },
+    { key: "bttsYes", labels: ["BTTS Yes", "Both Teams To Score Yes", "Both Teams To Score - Yes"] },
+    { key: "bttsNo", labels: ["BTTS No", "Both Teams To Score No", "Both Teams To Score - No"] },
+    { key: "over25", labels: ["Over 2.5", "O 2.5", "Over 2.5 goals"] },
+    { key: "under25", labels: ["Under 2.5", "U 2.5", "Under 2.5 goals"] },
+    { key: "cornersOver95", labels: ["Over 9.5 corners", "Corners Over 9.5"] },
+    { key: "cornersUnder95", labels: ["Under 9.5 corners", "Corners Under 9.5"] },
+  ];
+  return markets.reduce((parsed, market) => {
+    const value = extractDecimalNear(text, market.labels);
+    if (Number.isFinite(value) && value > 1) parsed[market.key] = value;
+    return parsed;
+  }, {});
+}
+
+function hasStatsSignal(text) {
+  return /corner|set piece|cross|wing|wide|pressure|shot volume|xg|expected goals|shots|cards|fouls|possession/i.test(String(text || ""));
+}
+
+async function scanSourceUrl(url) {
+  const safeUrl = safeSourceUrl(url);
+  if (!safeUrl) return { ok: false, text: "", error: "No URL" };
+  try {
+    const response = await fetch(`/api/source-scan?url=${encodeURIComponent(safeUrl)}`, { cache: "no-store" });
+    if (!response.ok) return { ok: false, text: "", error: `HTTP ${response.status}` };
+    return response.json();
+  } catch {
+    return { ok: false, text: "", error: "Source scan unavailable" };
+  }
 }
 
 function normalName(value) {
@@ -898,6 +1132,33 @@ function findFixtureForLiveGame(game) {
       (teamMatch(fixture.home, game.away) && teamMatch(fixture.away, game.home))
     );
   });
+}
+
+function liveGameBelongsInWeek(game, week) {
+  if (!game.date || !week) return false;
+  const gameDate = parseDate(game.date);
+  const start = parseDate(week.startDate || game.date);
+  const end = parseDate(week.endDate || week.startDate || game.date);
+  if (!gameDate || !start || !end) return false;
+  return gameDate >= start && gameDate <= end;
+}
+
+function addFixtureFromLiveGame(game) {
+  const week = getActiveGameweek();
+  if (!liveGameBelongsInWeek(game, week)) return null;
+  const duplicate = week.fixtures.find((fixture) => teamMatch(fixture.home, game.home) && teamMatch(fixture.away, game.away));
+  if (duplicate) return duplicate;
+  const fixture = {
+    date: game.date,
+    time: game.time || "TBC",
+    home: game.home,
+    away: game.away,
+    competitionId: activeCompetitionId === TODAYS_MATCHES_ID ? game.competitionId : activeCompetitionId,
+    competitionLabel: activeCompetitionId === TODAYS_MATCHES_ID && game.competitionId ? COMPETITIONS[game.competitionId]?.label : undefined,
+    sourceWeek: "Live provider",
+  };
+  week.fixtures.push(fixture);
+  return fixture;
 }
 
 function lineupImpact(text) {
@@ -941,6 +1202,7 @@ function normaliseStateShape() {
   }
   if (!state.lineups || typeof state.lineups !== "object") state.lineups = {};
   if (!state.odds || typeof state.odds !== "object") state.odds = {};
+  if (!state.sourceLinks || typeof state.sourceLinks !== "object") state.sourceLinks = {};
   if (!state.live || typeof state.live !== "object") state.live = {};
   if (typeof state.synthetic !== "boolean") state.synthetic = state.source === "Fallback calibration" && !bundled.length;
   state.currentGameweek = clamp(Number(state.currentGameweek) || 0, 0, state.gameweeks.length - 1);
@@ -998,7 +1260,7 @@ function csvToMatches(csvText) {
 }
 
 function buildFallbackMatches(competitionId) {
-  const teams = COMPETITIONS[competitionId].teams;
+  const teams = (competitionId === TODAYS_MATCHES_ID ? todayCompetitionConfig() : COMPETITIONS[competitionId]).teams;
   const matches = [];
   for (let season = 2021; season <= 2025; season += 1) {
     teams.forEach((home, hi) => {
@@ -1029,10 +1291,16 @@ const UEFA_BLEND_COMPETITIONS = new Set(["champions-league", "europa-league", "c
 
 function domesticMatchPoolForTeams(teams) {
   const wanted = new Set(teams);
-  return DOMESTIC_BLEND_COMPETITIONS.flatMap((competitionId) =>
+  const teamSpecific = DOMESTIC_BLEND_COMPETITIONS.flatMap((competitionId) =>
     bundledMatches(competitionId)
       .filter((match) => wanted.has(match.home) || wanted.has(match.away))
       .map((match) => ({ ...match, sourceCompetition: competitionId })),
+  );
+  if (teamSpecific.length) return teamSpecific;
+  return DOMESTIC_BLEND_COMPETITIONS.flatMap((competitionId) =>
+    bundledMatches(competitionId)
+      .slice(-220)
+      .map((match) => ({ ...match, sourceCompetition: competitionId, genericDomestic: true })),
   );
 }
 
@@ -1052,6 +1320,11 @@ function blendedModelMatches(modelMatches = state.matches) {
 }
 
 function loadState() {
+  if (activeCompetitionId === TODAYS_MATCHES_ID) {
+    state = createInitialState(activeCompetitionId);
+    normaliseStateShape();
+    return;
+  }
   const saved = localStorage.getItem(activeConfig().storageKey);
   if (saved) {
     try {
@@ -1229,7 +1502,6 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
   let awayWin = 0;
   let btts = 0;
   let over25 = 0;
-  let under25 = 0;
   let bestScore = { home: 0, away: 0, value: 0 };
 
   for (let hg = 0; hg <= 8; hg += 1) {
@@ -1240,10 +1512,10 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
       if (ag > hg) awayWin += p;
       if (hg > 0 && ag > 0) btts += p;
       if (hg + ag > 2.5) over25 += p;
-      if (hg + ag < 2.5) under25 += p;
       if (p > bestScore.value) bestScore = { home: hg, away: ag, value: p };
     }
   }
+  let goalLineOffset = 0;
 
   draw = clamp(draw * (1 + MODEL_SETTINGS.drawTune), 0.04, 0.42);
   const nonDraw = homeWin + awayWin || 1;
@@ -1260,8 +1532,8 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
 
   const marketGoals = marketOdds ? noVigProbabilities([marketOdds.over25, marketOdds.under25]) : null;
   if (marketGoals) {
+    goalLineOffset = clamp(marketGoals[0] - over25, -0.18, 0.18);
     over25 = clamp(over25 * 0.82 + marketGoals[0] * 0.18, 0.08, 0.92);
-    under25 = 1 - over25;
   }
 
   const winner = [
@@ -1274,21 +1546,28 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
     { label: `${fixture.home} or ${fixture.away}`, value: homeWin + awayWin },
     { label: `Draw or ${fixture.away}`, value: draw + awayWin },
   ].sort((x, y) => y.value - x.value)[0];
-  const goals = [
-    { label: "Over 2.5", value: over25 },
-    { label: "Under 2.5", value: under25 },
-  ].sort((x, y) => y.value - x.value)[0];
   const totalExpectedGoals = homeLambda + awayLambda;
+  const goals = bestOverUnderLine([2.5, 3.5], (line) => {
+    if (line === 2.5) return over25;
+    return clamp(poissonOverProbability(totalExpectedGoals, line) + goalLineOffset, 0.04, 0.96);
+  });
   const tempo = clamp((totalExpectedGoals - 2.15) / 2.2, -0.22, 0.28);
   const pressureGap = Math.abs(homeWin - awayWin);
   let cornersOver95 = clamp(0.49 + tempo + pressureGap * 0.1 + Math.abs(formGap) * 0.35, 0.28, 0.76);
   const marketCorners = marketOdds ? noVigProbabilities([marketOdds.cornersOver95, marketOdds.cornersUnder95]) : null;
+  const sourceNotes = String(state.sourceLinks?.[fixtureKey(fixture)]?.notes || "");
+  const scannedStats = String(state.sourceLinks?.[fixtureKey(fixture)]?.statsSignal || "");
+  const hasCornerResearch = /corner|set piece|cross|wing|wide|pressure|shot volume/i.test(`${sourceNotes} ${scannedStats}`);
+  let cornerLineOffset = 0;
   if (marketCorners) cornersOver95 = clamp(cornersOver95 * 0.78 + marketCorners[0] * 0.22, 0.18, 0.86);
-  const cornersUnder95 = 1 - cornersOver95;
-  const corners = [
-    { label: "Over 9.5 corners", value: cornersOver95 },
-    { label: "Under 9.5 corners", value: cornersUnder95 },
-  ].sort((x, y) => y.value - x.value)[0];
+  if (marketCorners) cornerLineOffset = clamp(marketCorners[0] - cornersOver95, -0.14, 0.14);
+  const expectedCorners = clamp(8.6 + totalExpectedGoals * 0.42 + pressureGap * 1.4 + Math.abs(formGap) * 2.8, 6.6, 12.9);
+  const corners = marketCorners || hasCornerResearch
+    ? bestOverUnderLine([8.5, 9.5, 10.5], (line) => {
+        if (line === 9.5) return cornersOver95;
+        return clamp(poissonOverProbability(expectedCorners, line) + cornerLineOffset, 0.08, 0.92);
+      }, " corners")
+    : { label: "Not yet available", value: 0 };
   const scorerSide = homeLambda >= awayLambda ? "home" : "away";
   const bookedSide = h.form < a.form ? "home" : "away";
   const fouledSide = homeLambda >= awayLambda ? "home" : "away";
@@ -1365,7 +1644,7 @@ function predictionBacktest() {
     const predictedVector = [p.homeWin, p.draw, p.awayWin];
     brier += predictedVector.reduce((sum, value, index) => sum + Math.pow(value - actualVector[index], 2), 0) / 3;
     if ((match.hg > 0 && match.ag > 0) === p.btts.label.endsWith("Yes")) btts += 1;
-    if ((match.hg + match.ag > 2.5) === p.goals.label.startsWith("Over")) ou25 += 1;
+    if (overUnderWon(p.goals.label, match.hg + match.ag)) ou25 += 1;
     if (p.score === `${match.hg}-${match.ag}`) exact += 1;
     if (match.odds) {
       const bestValue = bestBetRows(p, match.odds).find((row) => row.ev >= MODEL_SETTINGS.edgeThreshold);
@@ -1375,8 +1654,7 @@ function predictionBacktest() {
           (bestValue.key === "home" && actual === "H") ||
           (bestValue.key === "draw" && actual === "D") ||
           (bestValue.key === "away" && actual === "A") ||
-          (bestValue.key === "over25" && match.hg + match.ag > 2.5) ||
-          (bestValue.key === "under25" && match.hg + match.ag < 2.5);
+          (bestValue.key === "goalsDynamic" && overUnderWon(bestValue.label, match.hg + match.ag));
         valueProfit += won ? Number(bestValue.odds) - 1 : -1;
       }
     }
@@ -1459,7 +1737,7 @@ function activeCompetitionTrend(limit = 360) {
     bucket.tested += 1;
     if (actual === predicted) bucket.wins += 1;
     if ((match.hg > 0 && match.ag > 0) === prediction.btts.label.endsWith("Yes")) bucket.btts += 1;
-    if ((match.hg + match.ag > 2.5) === prediction.goals.label.startsWith("Over")) bucket.ou25 += 1;
+    if (overUnderWon(prediction.goals.label, match.hg + match.ag)) bucket.ou25 += 1;
   });
   return [...buckets.values()].filter((row) => row.tested >= 10).slice(-6);
 }
@@ -1468,7 +1746,10 @@ function renderPredictions() {
   const grid = el("predictionGrid");
   const week = getActiveGameweek();
   if (!week || !week.fixtures.length) {
-    grid.innerHTML = '<div class="empty">Add fixtures to this game week to generate predictions.</div>';
+    const message = UEFA_BLEND_COMPETITIONS.has(activeCompetitionId) || activeCompetitionId === TODAYS_MATCHES_ID
+      ? "Exact fixtures will appear here as soon as the live provider publishes them for this round/date."
+      : "Add fixtures to this game week to generate predictions.";
+    grid.innerHTML = `<div class="empty">${message}</div>`;
     return;
   }
 
@@ -1478,31 +1759,49 @@ function renderPredictions() {
       const p = predictFixture(fixture);
       const odds = state.odds?.[key] || {};
       const live = state.live?.[key] || {};
+      const sources = getSourceLinks(fixture);
+      const sourceButtons = [
+        ["Lineups", sources.lineups],
+        ["Odds", sources.odds],
+        ["Stats", sources.stats],
+      ]
+        .map(([label, url]) => ({ label, url: safeSourceUrl(url) }))
+        .filter((item) => item.url);
       const confidence = Math.max(p.winner.value, p.doubleChance.value, p.btts.value, p.goals.value);
       const result = fixtureResult(fixture);
+      const competitionLabel = fixture.competitionLabel ? `${escapeHtml(fixture.competitionLabel)} &middot; ` : "";
       const resultLabel = result ? `Result ${result.hg}-${result.ag}` : formatFixtureDate(fixture);
+      const updatedValue = predictionUpdatedAt(key);
+      const updatedLabel = updatedValue ? `${formatUpdateTime(updatedValue)} UK` : "Not yet updated";
       return `
-        <article class="card" data-fixture-key="${escapeHtml(key)}">
-          <div class="fixture-meta">${week.name} &middot; ${resultLabel}</div>
-          <div class="matchline">
-            <div class="team">${escapeHtml(p.home)}</div>
-            <div class="vs">v</div>
-            <div class="team">${escapeHtml(p.away)}</div>
-          </div>
-          <div class="scoreline">
-            <span>Predicted score</span>
-            <strong>${p.score}</strong>
-            <em>${pct(p.scoreConfidence)} exact-score model confidence</em>
-          </div>
-          <div class="prob-row"><strong>Home</strong><div class="bar"><span style="width:${pct(p.homeWin)}"></span></div><b>${pct(p.homeWin)}</b></div>
-          <div class="prob-row"><strong>Draw</strong><div class="bar bar--draw"><span style="width:${pct(p.draw)}"></span></div><b>${pct(p.draw)}</b></div>
-          <div class="prob-row"><strong>Away</strong><div class="bar bar--away"><span style="width:${pct(p.awayWin)}"></span></div><b>${pct(p.awayWin)}</b></div>
+        <article class="card fixture-card" data-fixture-key="${escapeHtml(key)}">
+          <details class="fixture-details">
+            <summary class="fixture-summary">
+              <div>
+                <span>${competitionLabel}${escapeHtml(week.name)} &middot; ${resultLabel}</span>
+                <strong>${escapeHtml(p.home)} v ${escapeHtml(p.away)}</strong>
+              </div>
+              <b>${p.score}</b>
+            </summary>
+            <div class="fixture-body">
+              <div class="prediction-updated">
+                <span>Prediction last updated</span>
+                <strong>${escapeHtml(updatedLabel)}</strong>
+              </div>
+              <div class="scoreline">
+                <span>Predicted score</span>
+                <strong>${p.score}</strong>
+                <em>${pct(p.scoreConfidence)} exact-score model confidence</em>
+              </div>
+              <div class="prob-row"><strong>Home</strong><div class="bar"><span style="width:${pct(p.homeWin)}"></span></div><b>${pct(p.homeWin)}</b></div>
+              <div class="prob-row"><strong>Draw</strong><div class="bar bar--draw"><span style="width:${pct(p.draw)}"></span></div><b>${pct(p.draw)}</b></div>
+              <div class="prob-row"><strong>Away</strong><div class="bar bar--away"><span style="width:${pct(p.awayWin)}"></span></div><b>${pct(p.awayWin)}</b></div>
           <div class="markets">
             <div class="market"><span>Winner</span><strong>${escapeHtml(p.winner.label)} ${pct(p.winner.value)}</strong></div>
             <div class="market"><span>Double chance</span><strong>${escapeHtml(p.doubleChance.label)} ${pct(p.doubleChance.value)}</strong></div>
             <div class="market"><span>BTTS</span><strong>${p.btts.label} ${pct(p.btts.value)}</strong></div>
-            <div class="market"><span>O/U 2.5 goals</span><strong>${p.goals.label} ${pct(p.goals.value)}</strong></div>
-            <div class="market"><span>O/U corners</span><strong>${p.corners.label} ${pct(p.corners.value)}</strong></div>
+            <div class="market"><span>Most likely goals line</span><strong>${p.goals.label} ${pct(p.goals.value)}</strong></div>
+            <div class="market"><span>Most likely corners line</span><strong>${p.corners.label}${p.corners.value ? ` ${pct(p.corners.value)}` : ""}</strong></div>
             <div class="market"><span>Player booked</span><strong>${escapeHtml(p.playerMarkets.booked.label)}${p.playerMarkets.booked.value ? ` ${pct(p.playerMarkets.booked.value)}` : ""}</strong></div>
             <div class="market"><span>Player fouled</span><strong>${escapeHtml(p.playerMarkets.fouled.label)}${p.playerMarkets.fouled.value ? ` ${pct(p.playerMarkets.fouled.value)}` : ""}</strong></div>
             <div class="market"><span>Player shots</span><strong>${escapeHtml(p.playerMarkets.shots.label)}${p.playerMarkets.shots.value ? ` ${pct(p.playerMarkets.shots.value)}` : ""}</strong></div>
@@ -1539,18 +1838,38 @@ function renderPredictions() {
             </div>
             ${renderValueSummary(key, p)}
           </div>
-          ${renderLiveNotes(live)}
+          <div class="source-panel">
+            <div class="odds-head">
+              <span>Source links</span>
+              <strong>Research inputs</strong>
+            </div>
+            <div class="source-grid">
+              <label>Lineups URL<input data-source-key="lineups" type="url" placeholder="Paste lineup page" value="${escapeHtml(sources.lineups || "")}"></label>
+              <label>Odds URL<input data-source-key="odds" type="url" placeholder="Paste bookmaker/exchange page" value="${escapeHtml(sources.odds || "")}"></label>
+              <label>Stats URL<input data-source-key="stats" type="url" placeholder="Paste stats, xG, shots, corners, cards, or fouls page" value="${escapeHtml(sources.stats || "")}"></label>
+            </div>
+            <label class="source-notes">Research notes<textarea data-source-key="notes" rows="3" placeholder="Paste important notes: injuries, rotation, corners trend, player shots, fouls, bookmaker price notes">${escapeHtml(sources.notes || "")}</textarea></label>
+            ${sources.scanStatus ? `<div class="source-status">${escapeHtml(sources.scanStatus)}</div>` : ""}
+            ${sourceButtons.length ? `<div class="source-links">${sourceButtons.map((item) => `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.label)}</a>`).join("")}</div>` : ""}
+            <div class="source-actions">
+              <button type="button" data-source-submit>Update prediction</button>
+            </div>
+          </div>
+          ${renderLiveNotes(live, odds, sources)}
           <div class="lineup-editor">
             <label>${escapeHtml(p.home)} lineup<textarea data-lineup-side="home" rows="4" placeholder="Not yet available">${escapeHtml(getLineup(fixture, "home"))}</textarea></label>
             <label>${escapeHtml(p.away)} lineup<textarea data-lineup-side="away" rows="4" placeholder="Not yet available">${escapeHtml(getLineup(fixture, "away"))}</textarea></label>
           </div>
           <div class="confidence">Expected goals ${p.expected} &middot; Lineup strength ${p.lineupNote} &middot; Confidence ${pct(confidence)}</div>
+            </div>
+          </details>
         </article>
       `;
     })
     .join("");
   attachLineupListeners();
   attachOddsListeners();
+  attachSourceLinkListeners();
 }
 
 function renderCompetitionList() {
@@ -1612,6 +1931,20 @@ function showModelPerformanceOnly() {
   scrollToPageTop();
 }
 
+function showTodaysMatches() {
+  activeCompetitionId = TODAYS_MATCHES_ID;
+  activePage = "league";
+  hasSelectedCompetition = true;
+  activeView = "odds";
+  localStorage.setItem("football-model-active-view-v2", activeView);
+  loadState();
+  populateTeamControls();
+  renderAll();
+  refreshLiveData();
+  closeCompetitionDrawer();
+  scrollToPageTop();
+}
+
 function showHomePage() {
   activePage = "home";
   hasSelectedCompetition = false;
@@ -1629,8 +1962,10 @@ function marketLabel(key) {
     doubleChance: "Double chance",
     bttsYes: "BTTS Yes",
     bttsNo: "BTTS No",
+    goalsDynamic: "Goals line",
     over25: "Over 2.5",
     under25: "Under 2.5",
+    cornersDynamic: "Corners line",
     cornersOver95: "Over 9.5 corners",
     cornersUnder95: "Under 9.5 corners",
     playerBooked: "Player to be booked",
@@ -1649,6 +1984,21 @@ function marketLabel(key) {
 }
 
 function allBetCandidates(prediction, odds = {}) {
+  const goalOdds = prediction.goals.label === "Over 2.5"
+    ? odds.over25
+    : prediction.goals.label === "Under 2.5"
+      ? odds.under25
+      : null;
+  const cornerOdds = prediction.corners.label === "Over 9.5 corners"
+    ? odds.cornersOver95
+    : prediction.corners.label === "Under 9.5 corners"
+      ? odds.cornersUnder95
+      : null;
+  const cornerCandidates = prediction.corners.value > 0
+    ? [
+        { key: "cornersDynamic", label: prediction.corners.label, probability: prediction.corners.value, odds: cornerOdds },
+      ]
+    : [];
   const candidates = [
     { key: "home", label: prediction.home, probability: prediction.homeWin, odds: odds.home },
     { key: "draw", label: "Draw", probability: prediction.draw, odds: odds.draw },
@@ -1656,10 +2006,8 @@ function allBetCandidates(prediction, odds = {}) {
     { key: "doubleChance", label: prediction.doubleChance.label, probability: prediction.doubleChance.value, odds: odds.doubleChance },
     { key: "bttsYes", label: "BTTS Yes", probability: prediction.btts.label === "BTTS Yes" ? prediction.btts.value : 1 - prediction.btts.value, odds: odds.bttsYes },
     { key: "bttsNo", label: "BTTS No", probability: prediction.btts.label === "BTTS No" ? prediction.btts.value : 1 - prediction.btts.value, odds: odds.bttsNo },
-    { key: "over25", label: "Over 2.5", probability: prediction.goals.label === "Over 2.5" ? prediction.goals.value : 1 - prediction.goals.value, odds: odds.over25 },
-    { key: "under25", label: "Under 2.5", probability: prediction.goals.label === "Under 2.5" ? prediction.goals.value : 1 - prediction.goals.value, odds: odds.under25 },
-    { key: "cornersOver95", label: "Over 9.5 corners", probability: prediction.corners.label.startsWith("Over") ? prediction.corners.value : 1 - prediction.corners.value, odds: odds.cornersOver95 },
-    { key: "cornersUnder95", label: "Under 9.5 corners", probability: prediction.corners.label.startsWith("Under") ? prediction.corners.value : 1 - prediction.corners.value, odds: odds.cornersUnder95 },
+    { key: "goalsDynamic", label: prediction.goals.label, probability: prediction.goals.value, odds: goalOdds },
+    ...cornerCandidates,
     { key: "playerBooked", label: prediction.playerMarkets.booked.label, probability: prediction.playerMarkets.booked.value, odds: odds.playerBooked },
     ...prediction.playerMarkets.fouled.options.map((option) => ({ key: option.key, label: option.label, probability: option.value, odds: odds[option.key] })),
     ...prediction.playerMarkets.shots.options.map((option) => ({ key: option.key, label: option.label, probability: option.value, odds: odds[option.key] })),
@@ -1730,11 +2078,11 @@ function combinedProbability(legs) {
 }
 
 function formatCombinedOdds(odds) {
-  return Number.isFinite(odds) && odds > 1 ? decimal(odds) : "Odds pending";
+  return Number.isFinite(odds) && odds > 1 ? decimalToFractional(odds) : "Odds pending";
 }
 
 function formatOddsPrice(odds) {
-  return Number.isFinite(Number(odds)) && Number(odds) > 1 ? decimal(odds) : "Odds pending";
+  return Number.isFinite(Number(odds)) && Number(odds) > 1 ? decimalToFractional(odds) : "Odds pending";
 }
 
 function legSummary(leg) {
@@ -1866,6 +2214,7 @@ function renderOddsDashboard() {
     const key = fixtureKey(fixture);
     return state.live?.[key]?.oddsUpdatedAt || Object.keys(state.odds?.[key] || {}).length;
   }).length || 0;
+  const oddsLabel = liveFixtures === 1 ? "fixture" : "fixtures";
   const backtest = predictionBacktest();
 
   panel.innerHTML = `
@@ -1873,7 +2222,7 @@ function renderOddsDashboard() {
       <div>
         <span>Centre dashboard</span>
         <strong>${week ? week.name : "Upcoming game week"}</strong>
-        <em>${liveFixtures} fixtures with odds data - recommendations rank model likelihood against live price</em>
+        <em>${liveFixtures} ${oddsLabel} with priced odds - recommendations rank model likelihood against entered or live prices</em>
       </div>
       <div class="odds-hero__stat">
         <span>Best edge</span>
@@ -1952,7 +2301,7 @@ function renderOddsDashboard() {
             ? `<div class="dashboard-list">${movementRows.map((row) => `
                 <div class="dashboard-row dashboard-row--compact">
                   <div><strong>${escapeHtml(row.fixture.home)} v ${escapeHtml(row.fixture.away)}</strong><span>${marketLabel(row.market)}</span></div>
-                  <b>${decimal(row.from)} -> ${decimal(row.to)}</b>
+                  <b>${formatOddsPrice(row.from)} -> ${formatOddsPrice(row.to)}</b>
                   <em>${row.change > 0 ? "Drift" : "Shortened"} ${(Math.abs(row.pctChange) * 100).toFixed(1)}%</em>
                 </div>
               `).join("")}</div>`
@@ -1966,7 +2315,7 @@ function renderOddsDashboard() {
         </div>
         <div class="mini-metrics">
           <div><span>BTTS</span><strong>${backtest.sample ? pct(backtest.btts) : "-"}</strong></div>
-          <div><span>O/U 2.5</span><strong>${backtest.sample ? pct(backtest.ou25) : "-"}</strong></div>
+          <div><span>Goals line</span><strong>${backtest.sample ? pct(backtest.ou25) : "-"}</strong></div>
           <div><span>Exact</span><strong>${backtest.sample ? pct(backtest.exact) : "-"}</strong></div>
           <div><span>ROI</span><strong>${backtest.sample ? `${(backtest.valueRoi * 100).toFixed(1)}%` : "-"}</strong></div>
         </div>
@@ -1984,7 +2333,7 @@ function renderValueSummary(key, prediction) {
   return `
     <div class="value-summary value-summary--${status}">
       <span>${status === "value" ? "Value flag" : "No clear value"}</span>
-      <strong>${escapeHtml(best.label)} at ${decimal(best.odds)}</strong>
+      <strong>${escapeHtml(best.label)} at ${formatOddsPrice(best.odds)}</strong>
       <em>Model ${pct(best.probability)} &middot; Implied ${pct(best.implied)} &middot; EV ${(best.ev * 100).toFixed(1)}% &middot; Quarter Kelly ${(best.stake * 100).toFixed(1)}% bank</em>
     </div>
   `;
@@ -2019,7 +2368,7 @@ function renderModelPerformance() {
       <div><span>Total historical results</span><strong>${totalMatches.toLocaleString()}</strong></div>
       <div><span>Average 1X2 accuracy</span><strong>${pct(averageAccuracy)}</strong></div>
       <div><span>Average Brier score</span><strong>${averageBrier ? averageBrier.toFixed(3) : "--"}</strong></div>
-      <div><span>Markets tested</span><strong>1X2 / BTTS / O/U 2.5</strong></div>
+      <div><span>Markets tested</span><strong>1X2 / BTTS / goals line</strong></div>
     </div>
     <section class="performance-section">
       <div class="dashboard-title">
@@ -2028,7 +2377,7 @@ function renderModelPerformance() {
       </div>
       <div class="performance-table">
         <div class="performance-row performance-row--head">
-          <span>Competition</span><span>Tested</span><span>1X2</span><span>BTTS</span><span>O/U 2.5</span><span>Brier</span>
+          <span>Competition</span><span>Tested</span><span>1X2</span><span>BTTS</span><span>Goals line</span><span>Brier</span>
         </div>
         ${summaries.map((row) => `
           <div class="performance-row">
@@ -2053,7 +2402,7 @@ function renderModelPerformance() {
               <div class="trend-card">
                 <span>${escapeHtml(row.season)}</span>
                 <strong>${pct(row.wins / row.tested)}</strong>
-                <em>${row.tested} tested / BTTS ${pct(row.btts / row.tested)} / O/U ${pct(row.ou25 / row.tested)}</em>
+                <em>${row.tested} tested / BTTS ${pct(row.btts / row.tested)} / goals line ${pct(row.ou25 / row.tested)}</em>
                 <div class="trend-bar"><span style="width:${pct(row.wins / row.tested)}"></span></div>
               </div>
             `).join("")}</div>`
@@ -2066,10 +2415,22 @@ function renderModelPerformance() {
   });
 }
 
-function renderLiveNotes(live) {
-  if (!live || (!live.xg && !live.teamNews && !live.oddsUpdatedAt && !live.lineupsUpdatedAt)) return "";
+function renderLiveNotes(live = {}, odds = {}, sources = {}) {
+  const hasOdds = Object.keys(odds || {}).length > 0;
+  const hasSource = Boolean(sources.odds || sources.lineups || sources.stats);
+  if (!live || (!live.xg && !live.teamNews && !live.oddsUpdatedAt && !live.lineupsUpdatedAt && !hasOdds && !hasSource)) return "";
   const xgText = live.xg ? `xG feed ${decimal(live.xg.home)}-${decimal(live.xg.away)}` : "xG pending";
-  const oddsText = live.oddsUpdatedAt ? "Odds live" : "Odds pending";
+  const oddsText = live.oddsUpdatedAt
+    ? live.oddsSource === "source URL"
+      ? "Odds from URL"
+      : live.oddsSource === "research notes"
+        ? "Odds from notes"
+        : "Odds live"
+    : hasOdds
+      ? "Odds entered"
+      : sources.odds
+        ? "Odds link saved"
+        : "Odds pending";
   const lineupText = live.lineupsUpdatedAt ? "Lineups live" : "Lineups pending";
   return `
     <div class="live-notes">
@@ -2093,8 +2454,8 @@ function renderChrome() {
   if (el("competitionEyebrow")) el("competitionEyebrow").textContent = "Fixture IQ";
   if (el("dataStatus")) el("dataStatus").textContent = `${competitionIds().length} competitions covered`;
   if (el("coverageCount")) el("coverageCount").textContent = competitionIds().length;
-  if (el("testedCount")) el("testedCount").textContent = totalTested.toLocaleString();
-  if (el("topAccuracy")) el("topAccuracy").textContent = bestAccuracy ? pct(bestAccuracy) : "--";
+  if (el("testedCount")) el("testedCount").textContent = totalTested ? totalTested.toLocaleString() : "Loading";
+  if (el("topAccuracy")) el("topAccuracy").textContent = bestAccuracy ? pct(bestAccuracy) : "Loading";
   if (el("activeCompetitionName")) el("activeCompetitionName").textContent = config.label;
   const blendNote = UEFA_BLEND_COMPETITIONS.has(activeCompetitionId) ? " - 70/30 Europe/domestic blend" : "";
   if (el("modelStamp")) el("modelStamp").textContent = realMatchCount
@@ -2111,6 +2472,7 @@ function renderChrome() {
   document.querySelectorAll(".competition-option").forEach((tab) => {
     tab.classList.toggle("is-active", tab.dataset.competition === activeCompetitionId);
   });
+  if (el("drawerToday")) el("drawerToday").classList.toggle("is-active", activeCompetitionId === TODAYS_MATCHES_ID);
 }
 
 function renderView() {
@@ -2161,7 +2523,7 @@ function renderBacktest() {
     <div class="backtest-metrics">
       <div><span>1X2 hit</span><strong>${pct(backtest.oneXTwo)}</strong></div>
       <div><span>BTTS hit</span><strong>${pct(backtest.btts)}</strong></div>
-      <div><span>O/U 2.5 hit</span><strong>${pct(backtest.ou25)}</strong></div>
+      <div><span>Goals line hit</span><strong>${pct(backtest.ou25)}</strong></div>
       <div><span>Exact score</span><strong>${pct(backtest.exact)}</strong></div>
       <div><span>Brier</span><strong>${backtest.brier.toFixed(3)}</strong></div>
       <div><span>Value bets</span><strong>${backtest.valueBets}</strong></div>
@@ -2186,7 +2548,7 @@ function historicalPredictionRows(limit = 30) {
     const pick = prediction.homeWin > prediction.draw && prediction.homeWin > prediction.awayWin ? "H" : prediction.draw > prediction.awayWin ? "D" : "A";
     const pickLabel = pick === "H" ? match.home : pick === "A" ? match.away : "Draw";
     const bttsWon = (match.hg > 0 && match.ag > 0) === prediction.btts.label.endsWith("Yes");
-    const goalsWon = (match.hg + match.ag > 2.5) === prediction.goals.label.startsWith("Over");
+    const goalsWon = overUnderWon(prediction.goals.label, match.hg + match.ag);
     return {
       id: `${match.date}-${match.home}-${match.away}-${index}-${sample.length}`,
       date: match.date,
@@ -2223,7 +2585,7 @@ function renderBacktestDetails() {
         <div><span>Shown sample</span><strong>${rows.length} matches</strong></div>
         <div><span>Winner accuracy</span><strong>${pct(oneXTwoHit)}</strong></div>
         <div><span>BTTS accuracy</span><strong>${pct(bttsHit)}</strong></div>
-        <div><span>O/U 2.5 accuracy</span><strong>${pct(goalsHit)}</strong></div>
+        <div><span>Goals line accuracy</span><strong>${pct(goalsHit)}</strong></div>
       </div>
       <div class="history-table">
         <div class="history-row history-row--head">
@@ -2243,7 +2605,7 @@ function renderBacktestDetails() {
 }
 
 function attachLineupListeners() {
-  document.querySelectorAll("[data-fixture-key] textarea").forEach((textarea) => {
+  document.querySelectorAll("[data-fixture-key] [data-lineup-side]").forEach((textarea) => {
     textarea.addEventListener("input", (event) => {
       const card = event.target.closest("[data-fixture-key]");
       if (!card) return;
@@ -2252,6 +2614,105 @@ function attachLineupListeners() {
       saveState();
       clearTimeout(lineupRenderTimer);
       lineupRenderTimer = setTimeout(renderPredictions, 650);
+    });
+  });
+}
+
+function attachSourceLinkListeners() {
+  const persistSourceInputs = (card) => {
+    if (!card) return false;
+    if (!state.sourceLinks[card.dataset.fixtureKey]) state.sourceLinks[card.dataset.fixtureKey] = {};
+    card.querySelectorAll("[data-source-key]").forEach((input) => {
+      const sourceKey = input.dataset.sourceKey;
+      const value = input.value.trim();
+      if (value) {
+        state.sourceLinks[card.dataset.fixtureKey][sourceKey] = value;
+      } else {
+        delete state.sourceLinks[card.dataset.fixtureKey][sourceKey];
+      }
+    });
+    return true;
+  };
+
+  const saveSourceInputs = async (card, scanLinks = false) => {
+    if (!persistSourceInputs(card)) return false;
+    const fixture = findFixtureByKey(card.dataset.fixtureKey);
+    const sources = state.sourceLinks[card.dataset.fixtureKey];
+    const scans = [];
+    let oddsText = sources.notes || "";
+    let statsText = sources.notes || "";
+
+    if (scanLinks) {
+      const blocked = [];
+      if (sources.odds) {
+        const scan = await scanSourceUrl(sources.odds);
+        scans.push(scan.ok ? "Odds URL read" : "Odds URL blocked");
+        if (!scan.ok) blocked.push("Odds URL");
+        if (scan.ok) oddsText = `${oddsText} ${scan.text}`;
+      }
+      if (sources.stats) {
+        const scan = await scanSourceUrl(sources.stats);
+        scans.push(scan.ok ? "Stats URL read" : "Stats URL blocked");
+        if (!scan.ok) blocked.push("Stats URL");
+        if (scan.ok) statsText = `${statsText} ${scan.text}`;
+      }
+      if (blocked.length && typeof window !== "undefined" && typeof window.alert === "function") {
+        window.alert(`${blocked.join(" and ")} could not be read automatically. The link has been saved, but this site may block automated reading.`);
+      }
+    }
+
+    const parsedOdds = oddsFromResearchNotes(oddsText, fixture);
+    if (Object.keys(parsedOdds).length) {
+      state.odds[card.dataset.fixtureKey] = {
+        ...(state.odds[card.dataset.fixtureKey] || {}),
+        ...parsedOdds,
+      };
+      state.live[card.dataset.fixtureKey] = {
+        ...(state.live[card.dataset.fixtureKey] || {}),
+        oddsUpdatedAt: new Date().toISOString(),
+        oddsSource: scanLinks ? "source URL" : "research notes",
+      };
+    }
+    if (hasStatsSignal(statsText)) {
+      state.sourceLinks[card.dataset.fixtureKey].statsSignal = "Stats source includes match-stat context";
+      state.live[card.dataset.fixtureKey] = {
+        ...(state.live[card.dataset.fixtureKey] || {}),
+        sourceScanUpdatedAt: new Date().toISOString(),
+      };
+    }
+    if (scanLinks) {
+      state.sourceLinks[card.dataset.fixtureKey].scanStatus = scans.length ? scans.join(" / ") : "No source URLs to scan";
+      state.sourceLinks[card.dataset.fixtureKey].scanUpdatedAt = new Date().toISOString();
+    }
+    saveState();
+    return true;
+  };
+
+  document.querySelectorAll("[data-fixture-key] [data-source-key]").forEach((input) => {
+    const handler = (event) => {
+      const card = event.target.closest("[data-fixture-key]");
+      if (!card) return;
+      persistSourceInputs(card);
+      saveState();
+    };
+    input.addEventListener(input.tagName === "TEXTAREA" ? "input" : "change", handler);
+  });
+
+  document.querySelectorAll("[data-fixture-key] [data-source-submit]").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      const card = event.target.closest("[data-fixture-key]");
+      button.textContent = "Checking links";
+      button.disabled = true;
+      try {
+        if (!await saveSourceInputs(card, true)) return;
+        renderAll();
+      } catch {
+        if (typeof window !== "undefined" && typeof window.alert === "function") {
+          window.alert("The source links could not be checked. Please try again or use a different source.");
+        }
+        button.textContent = "Update prediction";
+        button.disabled = false;
+      }
     });
   });
 }
@@ -2315,7 +2776,7 @@ async function refreshCurrentSeasonResults() {
 }
 
 function mergeLiveGame(game) {
-  const fixture = findFixtureForLiveGame(game);
+  const fixture = findFixtureForLiveGame(game) || addFixtureFromLiveGame(game);
   if (!fixture) return false;
   const key = fixtureKey(fixture);
   if (!state.live[key]) state.live[key] = {};
@@ -2324,7 +2785,29 @@ function mergeLiveGame(game) {
     if (!state.odds[key]) state.odds[key] = {};
     const previousOdds = { ...state.odds[key] };
     const movement = {};
-    ["home", "draw", "away", "bttsYes", "bttsNo", "over25", "under25"].forEach((market) => {
+    [
+      "home",
+      "draw",
+      "away",
+      "bttsYes",
+      "bttsNo",
+      "over25",
+      "under25",
+      "cornersOver95",
+      "cornersUnder95",
+      "playerBooked",
+      "playerScorer",
+      "playerFouled1",
+      "playerFouled2",
+      "playerFouled3",
+      "playerShots1",
+      "playerShots2",
+      "playerShots3",
+      "playerShots4",
+      "playerSot1",
+      "playerSot2",
+      "playerSot3",
+    ].forEach((market) => {
       const nextPrice = Number(game.odds[market]);
       const previousPrice = Number(previousOdds[market]);
       if (Number.isFinite(nextPrice) && nextPrice > 1) {
@@ -2365,12 +2848,19 @@ async function refreshLiveData() {
   el("liveDataStamp").textContent = "Checking market";
   el("liveDataSummary").textContent = "Updating";
   try {
-    const response = await fetch(`/api/live-data?competition=${encodeURIComponent(activeCompetitionId)}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
-    const merged = (payload.games || []).filter(mergeLiveGame).length;
+    const ids = activeCompetitionId === TODAYS_MATCHES_ID ? competitionIds() : [activeCompetitionId];
+    const payloads = await Promise.all(
+      ids.map(async (competitionId) => {
+        const response = await fetch(`/api/live-data?competition=${encodeURIComponent(competitionId)}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      }),
+    );
+    const merged = payloads
+      .flatMap((payload, index) => (payload.games || []).map((game) => ({ ...game, competitionId: ids[index] })))
+      .filter(mergeLiveGame).length;
     state.live.lastRefresh = new Date().toISOString();
-    saveState();
+    if (activeCompetitionId !== TODAYS_MATCHES_ID) saveState();
     el("liveDataStamp").textContent = merged ? "Market data updated" : "Market watch ready";
     el("liveDataSummary").textContent = merged ? `${merged} matches refreshed` : "No new movement";
   } catch (error) {
@@ -2455,6 +2945,7 @@ function init() {
   if (el("competitionMenu")) el("competitionMenu").addEventListener("click", openCompetitionDrawer);
   if (el("appCompetitionMenu")) el("appCompetitionMenu").addEventListener("click", openCompetitionDrawer);
   if (el("drawerPerformance")) el("drawerPerformance").addEventListener("click", showModelPerformanceOnly);
+  if (el("drawerToday")) el("drawerToday").addEventListener("click", showTodaysMatches);
   if (el("homeLink")) el("homeLink").addEventListener("click", showHomePage);
   if (el("closeCompetitionMenu")) el("closeCompetitionMenu").addEventListener("click", closeCompetitionDrawer);
   if (el("competitionDrawer")) el("competitionDrawer").addEventListener("click", (event) => {
