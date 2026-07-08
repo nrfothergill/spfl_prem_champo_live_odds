@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Fixture IQ</title>
-    <link rel="stylesheet" href="styles.css?v=38" />
+    <link rel="stylesheet" href="styles.css?v=52" />
   </head>
   <body>
     <aside class="competition-drawer" id="competitionDrawer" aria-hidden="true">
@@ -48,7 +48,7 @@
           </div>
 
           <div class="logo-stage">
-            <img src="assets/fixture-iq-logo.png?v=38" alt="Fixture IQ - Smarter Predictions. Better Decisions." />
+            <img src="assets/fixture-iq-logo.png?v=52" alt="Fixture IQ - Smarter Predictions. Better Decisions." />
           </div>
 
           <div class="home-hero">
@@ -71,21 +71,18 @@
           <div class="section-head">
             <div>
               <p class="eyebrow">League Workspace</p>
-              <h2 id="activeWeekSubtitle">Select a competition to view dashboard, predictions, and backtest</h2>
+              <h2 id="activeWeekSubtitle">Select a competition to view predictions and backtest</h2>
             </div>
             <div class="toolbar">
-              <button id="liveRefresh" type="button">Update Market Data</button>
               <button id="exportData" type="button">Export Data</button>
               <button id="resetData" class="ghost" type="button">Reset</button>
             </div>
           </div>
-          <nav class="view-tabs" aria-label="Dashboard views">
-            <button class="view-tab" type="button" data-view="odds">Odds Dashboard</button>
+          <nav class="view-tabs" aria-label="Workspace views">
             <button class="view-tab" type="button" data-view="predictions">Predictions</button>
             <button class="view-tab" type="button" data-view="backtest">Backtest</button>
           </nav>
-          <section id="oddsDashboard" class="view-panel view-panel--active"></section>
-          <section id="predictionsView" class="view-panel">
+          <section id="predictionsView" class="view-panel view-panel--active">
             <div id="predictionGrid" class="prediction-grid"></div>
           </section>
           <section id="backtestView" class="view-panel">
@@ -95,7 +92,7 @@
         </section>
       </section>
     </main>
-    <script src="data.js?v=38"></script>
-    <script src="app.js?v=38"></script>
+    <script src="data.js?v=52"></script>
+    <script src="app.js?v=52"></script>
   </body>
 </html>

@@ -1,52 +1,31 @@
 const COMPETITIONS = {
-  spfl: {
-    oddsKeys: ["soccer_scotland_premiership"],
-    apiFootballLeague: 179,
-  },
-  "premier-league": {
-    oddsKeys: ["soccer_epl"],
-    apiFootballLeague: 39,
-  },
-  "ligue-1": {
-    oddsKeys: ["soccer_france_ligue_one"],
-    apiFootballLeague: 61,
-  },
-  bundesliga: {
-    oddsKeys: ["soccer_germany_bundesliga"],
-    apiFootballLeague: 78,
-  },
-  "la-liga": {
-    oddsKeys: ["soccer_spain_la_liga"],
-    apiFootballLeague: 140,
-  },
-  "serie-a": {
-    oddsKeys: ["soccer_italy_serie_a"],
-    apiFootballLeague: 135,
-  },
-  "primeira-liga": {
-    oddsKeys: ["soccer_portugal_primeira_liga"],
-    apiFootballLeague: 94,
-  },
+  spfl: { oddsKeys: ["soccer_scotland_premiership"], apiFootballLeague: 179 },
+  "premier-league": { oddsKeys: ["soccer_epl"], apiFootballLeague: 39 },
+  "ligue-1": { oddsKeys: ["soccer_france_ligue_one"], apiFootballLeague: 61 },
+  bundesliga: { oddsKeys: ["soccer_germany_bundesliga"], apiFootballLeague: 78 },
+  "la-liga": { oddsKeys: ["soccer_spain_la_liga"], apiFootballLeague: 140 },
+  "serie-a": { oddsKeys: ["soccer_italy_serie_a"], apiFootballLeague: 135 },
+  "primeira-liga": { oddsKeys: ["soccer_portugal_primeira_liga"], apiFootballLeague: 94 },
   "champions-league": {
     oddsKeys: ["soccer_uefa_champs_league"],
     apiFootballLeague: 2,
     qualificationWindows: [["2026-07-07", "2026-07-09"]],
     officialFixtureSource: "UEFA.com",
-    trustApiFootballFixtures: false,
+    trustApiFootballFixtures: true,
   },
   "europa-league": {
     oddsKeys: ["soccer_uefa_europa_league"],
     apiFootballLeague: 3,
     qualificationWindows: [["2026-07-09", "2026-07-09"]],
     officialFixtureSource: "UEFA.com",
-    trustApiFootballFixtures: false,
+    trustApiFootballFixtures: true,
   },
   "conference-league": {
     oddsKeys: ["soccer_uefa_europa_conference_league"],
     apiFootballLeague: 848,
     qualificationWindows: [["2026-07-09", "2026-07-09"]],
     officialFixtureSource: "UEFA.com",
-    trustApiFootballFixtures: false,
+    trustApiFootballFixtures: true,
   },
 };
 
@@ -89,10 +68,7 @@ function ukDateTime(value) {
     hour12: false,
   }).formatToParts(parsed);
   const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return {
-    date: `${lookup.year}-${lookup.month}-${lookup.day}`,
-    time: `${lookup.hour}:${lookup.minute}`,
-  };
+  return { date: `${lookup.year}-${lookup.month}-${lookup.day}`, time: `${lookup.hour}:${lookup.minute}` };
 }
 
 function parseOddsApiGame(game) {
@@ -117,30 +93,80 @@ function parseOddsApiGame(game) {
   };
 }
 
-async function fetchOdds(competition) {
-  const apiKey = process.env.ODDS_API_KEY;
-  if (!apiKey) return [];
-  for (const sportKey of competition.oddsKeys) {
-    const url = new URL(`https://api.the-odds-api.com/v4/sports/${sportKey}/odds/`);
-    url.searchParams.set("apiKey", apiKey);
-    url.searchParams.set("regions", process.env.ODDS_REGIONS || "uk,eu");
-    const extraMarkets = process.env.EXTRA_ODDS_MARKETS ? `,${process.env.EXTRA_ODDS_MARKETS}` : "";
-    url.searchParams.set("markets", `h2h,totals,btts${extraMarkets}`);
-    url.searchParams.set("oddsFormat", "decimal");
-    const response = await fetch(url);
-    if (response.ok) return (await response.json()).map(parseOddsApiGame);
+async function readJsonOrText(response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text.slice(0, 220);
   }
-  return [];
 }
 
-async function apiFootball(path, params = {}) {
+async function fetchOdds(competition) {
+  const apiKey = process.env.ODDS_API_KEY;
+  const diagnostics = {
+    connected: Boolean(apiKey),
+    provider: "The Odds API",
+    gamesReturned: 0,
+    pricedGames: 0,
+    marketsUsed: "",
+    sportKey: competition.oddsKeys?.[0] || "",
+    message: apiKey ? "Odds key found" : "Odds key missing",
+    errors: [],
+  };
+  if (!apiKey) return { games: [], diagnostics };
+
+  const extraMarkets = process.env.EXTRA_ODDS_MARKETS ? `,${process.env.EXTRA_ODDS_MARKETS}` : "";
+  const marketAttempts = [`h2h,totals,btts${extraMarkets}`, "h2h,totals,btts", "h2h,totals", "h2h"];
+
+  for (const sportKey of competition.oddsKeys || []) {
+    for (const markets of marketAttempts) {
+      const url = new URL(`https://api.the-odds-api.com/v4/sports/${sportKey}/odds/`);
+      url.searchParams.set("apiKey", apiKey);
+      url.searchParams.set("regions", process.env.ODDS_REGIONS || "uk,eu");
+      url.searchParams.set("markets", markets);
+      url.searchParams.set("oddsFormat", "decimal");
+
+      const response = await fetch(url);
+      diagnostics.sportKey = sportKey;
+      diagnostics.marketsUsed = markets;
+      diagnostics.remainingRequests = response.headers.get("x-requests-remaining") || "";
+      diagnostics.usedRequests = response.headers.get("x-requests-used") || "";
+
+      if (!response.ok) {
+        const body = await readJsonOrText(response);
+        diagnostics.errors.push(`${sportKey} ${markets}: HTTP ${response.status} ${typeof body === "string" ? body : body?.message || body?.error || ""}`.trim());
+        continue;
+      }
+
+      const games = (await response.json()).map(parseOddsApiGame);
+      diagnostics.gamesReturned = games.length;
+      diagnostics.pricedGames = games.filter((game) => Object.values(game.odds || {}).some((price) => Number(price) > 1)).length;
+      diagnostics.message = games.length
+        ? `Odds returned ${games.length} games using ${markets}`
+        : `Odds connected, but ${sportKey} returned no upcoming games`;
+      return { games, diagnostics };
+    }
+  }
+
+  diagnostics.message = diagnostics.errors[0] || "Odds API returned no usable response";
+  return { games: [], diagnostics };
+}
+
+async function apiFootball(path, params = {}, diagnostics) {
   const apiKey = process.env.API_FOOTBALL_KEY;
   if (!apiKey) return null;
   const url = new URL(`https://v3.football.api-sports.io/${path}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   const response = await fetch(url, { headers: { "x-apisports-key": apiKey } });
-  if (!response.ok) return null;
-  return response.json();
+  if (!response.ok) {
+    diagnostics?.errors.push(`${path}: HTTP ${response.status}`);
+    return null;
+  }
+  const json = await response.json();
+  const apiError = json?.errors && Object.keys(json.errors).length ? JSON.stringify(json.errors).slice(0, 220) : "";
+  if (apiError) diagnostics?.errors.push(`${path}: ${apiError}`);
+  return json;
 }
 
 function lineupText(lineup) {
@@ -155,35 +181,44 @@ function statValue(stats, teamName, labels) {
   return Number.isFinite(value) ? value : null;
 }
 
-async function fetchFixtureContext(competition, fixtureParams) {
+async function fetchFixtureContext(competition, fixtureParams, diagnostics) {
   if (!process.env.API_FOOTBALL_KEY) return [];
-  const fixtures = await apiFootball("fixtures", fixtureParams);
+  const fixtures = await apiFootball("fixtures", fixtureParams, diagnostics);
   const games = [];
-  for (const fixture of fixtures?.response || []) {
+  const fixtureRows = fixtures?.response || [];
+  diagnostics.fixtureRows += fixtureRows.length;
+
+  for (const fixture of fixtureRows) {
     const fixtureId = fixture.fixture?.id;
     const home = fixture.teams?.home?.name;
     const away = fixture.teams?.away?.name;
     if (!fixtureId || !home || !away) continue;
     const [lineups, stats] = await Promise.all([
-      apiFootball("fixtures/lineups", { fixture: fixtureId }),
-      apiFootball("fixtures/statistics", { fixture: fixtureId }),
+      apiFootball("fixtures/lineups", { fixture: fixtureId }, diagnostics),
+      apiFootball("fixtures/statistics", { fixture: fixtureId }, diagnostics),
     ]);
     const homeLineup = lineups?.response?.find((entry) => normalName(entry.team?.name).includes(normalName(home)));
     const awayLineup = lineups?.response?.find((entry) => normalName(entry.team?.name).includes(normalName(away)));
     const homeXg = statValue(stats?.response, home, ["expected goals", "xg"]);
     const awayXg = statValue(stats?.response, away, ["expected goals", "xg"]);
     const uk = ukDateTime(fixture.fixture?.date);
+    const status = fixture.fixture?.status?.short || "";
+    const homeGoals = Number(fixture.goals?.home);
+    const awayGoals = Number(fixture.goals?.away);
+    const completed = ["FT", "AET", "PEN"].includes(status) && Number.isFinite(homeGoals) && Number.isFinite(awayGoals);
+    if (lineupText(homeLineup) || lineupText(awayLineup)) diagnostics.lineupGames += 1;
+    if (homeXg != null && awayXg != null) diagnostics.xgGames += 1;
     games.push({
       home,
       away,
       date: uk.date,
       time: uk.time,
-      lineups: {
-        home: lineupText(homeLineup),
-        away: lineupText(awayLineup),
-      },
+      lineups: { home: lineupText(homeLineup), away: lineupText(awayLineup) },
       xg: homeXg != null && awayXg != null ? { home: homeXg, away: awayXg } : null,
       teamNews: fixture.fixture?.status?.long,
+      status,
+      completed,
+      result: completed ? { home: homeGoals, away: awayGoals } : null,
       lineupsUpdatedAt: new Date().toISOString(),
       xgUpdatedAt: new Date().toISOString(),
     });
@@ -192,35 +227,60 @@ async function fetchFixtureContext(competition, fixtureParams) {
 }
 
 async function fetchFixtureContexts(competition) {
+  const diagnostics = {
+    connected: Boolean(process.env.API_FOOTBALL_KEY),
+    provider: "API-Football",
+    fixtureRows: 0,
+    contextGames: 0,
+    lineupGames: 0,
+    xgGames: 0,
+    message: process.env.API_FOOTBALL_KEY ? "Football key found" : "Football API key missing",
+    errors: [],
+  };
+  if (!process.env.API_FOOTBALL_KEY) return { games: [], diagnostics };
+  const today = ukDateTime(new Date().toISOString()).date;
+
   const qualificationRequests = (competition.qualificationWindows || []).map(([from, to]) =>
-    fetchFixtureContext(competition, {
-      league: competition.apiFootballLeague,
-      season: "2026",
-      from,
-      to,
-    }).catch(() => []),
+    fetchFixtureContext(competition, { league: competition.apiFootballLeague, season: "2026", from, to }, diagnostics).catch((error) => {
+      diagnostics.errors.push(error.message);
+      return [];
+    }),
   );
-  const [upcoming, live, ...qualification] = await Promise.all([
-    fetchFixtureContext(competition, {
-      league: competition.apiFootballLeague,
-      season: "2026",
-      next: "30",
-    }).catch(() => []),
-    fetchFixtureContext(competition, {
-      league: competition.apiFootballLeague,
-      season: "2026",
-      live: "all",
-    }).catch(() => []),
+
+  const [upcoming, live, completedToday, ...qualification] = await Promise.all([
+    fetchFixtureContext(competition, { league: competition.apiFootballLeague, season: "2026", next: "30" }, diagnostics).catch((error) => {
+      diagnostics.errors.push(error.message);
+      return [];
+    }),
+    fetchFixtureContext(competition, { league: competition.apiFootballLeague, season: "2026", live: "all" }, diagnostics).catch((error) => {
+      diagnostics.errors.push(error.message);
+      return [];
+    }),
+    fetchFixtureContext(competition, { league: competition.apiFootballLeague, season: "2026", date: today }, diagnostics).catch((error) => {
+      diagnostics.errors.push(error.message);
+      return [];
+    }),
     ...qualificationRequests,
   ]);
-  return mergeGames(upcoming, live, ...qualification);
+
+  const games = mergeGames(upcoming, live, completedToday, ...qualification);
+  diagnostics.contextGames = games.length;
+  diagnostics.message = games.length
+    ? `Football API returned ${games.length} fixture records`
+    : "Football API connected, but no fixture context is available yet";
+  return { games, diagnostics };
 }
 
 function mergeGames(...groups) {
   const map = new Map();
   groups.flat().forEach((game) => {
     const key = `${normalName(game.home)}-${normalName(game.away)}`;
-    map.set(key, { ...(map.get(key) || {}), ...game, odds: { ...(map.get(key)?.odds || {}), ...(game.odds || {}) }, lineups: { ...(map.get(key)?.lineups || {}), ...(game.lineups || {}) } });
+    map.set(key, {
+      ...(map.get(key) || {}),
+      ...game,
+      odds: { ...(map.get(key)?.odds || {}), ...(game.odds || {}) },
+      lineups: { ...(map.get(key)?.lineups || {}), ...(game.lineups || {}) },
+    });
   });
   return [...map.values()];
 }
@@ -233,21 +293,41 @@ export default async function handler(request, response) {
     return;
   }
 
-  const [oddsGames, contextGames] = await Promise.all([
-    fetchOdds(competition).catch(() => []),
-    competition.trustApiFootballFixtures === false ? [] : fetchFixtureContexts(competition).catch(() => []),
+  const [oddsResult, contextResult] = await Promise.all([
+    fetchOdds(competition).catch((error) => ({
+      games: [],
+      diagnostics: { connected: Boolean(process.env.ODDS_API_KEY), provider: "The Odds API", message: error.message, errors: [error.message] },
+    })),
+    competition.trustApiFootballFixtures === false
+      ? Promise.resolve({
+          games: [],
+          diagnostics: {
+            connected: Boolean(process.env.API_FOOTBALL_KEY),
+            provider: "API-Football",
+            message: "UEFA fixtures are locked to bundled official fixtures, so third-party fixture creation is disabled",
+            errors: [],
+          },
+        })
+      : fetchFixtureContexts(competition).catch((error) => ({
+          games: [],
+          diagnostics: { connected: Boolean(process.env.API_FOOTBALL_KEY), provider: "API-Football", message: error.message, errors: [error.message] },
+        })),
   ]);
+
   response.setHeader("Cache-Control", "no-store, max-age=0");
   response.status(200).json({
     providerStatus: [
       competition.officialFixtureSource ? `Fixtures locked to ${competition.officialFixtureSource}` : "Fixture feed active",
-      process.env.ODDS_API_KEY ? "Odds connected" : "Odds key missing",
-      competition.trustApiFootballFixtures === false
-        ? "Third-party fixtures blocked for UEFA"
-        : process.env.API_FOOTBALL_KEY
-          ? "Lineups/xG connected"
-          : "Football API key missing",
+      oddsResult.diagnostics.connected ? "Odds key found" : "Odds key missing",
+      contextResult.diagnostics.connected ? "Football key found" : "Football API key missing",
     ].join(" / "),
-    games: mergeGames(oddsGames, contextGames),
+    diagnostics: {
+      competition: competitionId,
+      generatedAt: new Date().toISOString(),
+      odds: oddsResult.diagnostics,
+      football: contextResult.diagnostics,
+      mergedGames: mergeGames(oddsResult.games, contextResult.games).length,
+    },
+    games: mergeGames(oddsResult.games, contextResult.games),
   });
 }

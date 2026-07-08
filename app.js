@@ -5,6 +5,43 @@ const MODEL_SETTINGS = {
   edgeThreshold: 0.035,
   kellyFraction: 0.25,
 };
+const FIXTURE_SCHEMA_VERSION = 51;
+
+const FORMATIONS = {
+  "4-3-3": ["GK", "RB", "RCB", "LCB", "LB", "RCM", "CM", "LCM", "RW", "ST", "LW"],
+  "4-2-3-1": ["GK", "RB", "RCB", "LCB", "LB", "RDM", "LDM", "RW", "CAM", "LW", "ST"],
+  "4-4-2": ["GK", "RB", "RCB", "LCB", "LB", "RM", "RCM", "LCM", "LM", "RST", "LST"],
+  "3-4-3": ["GK", "RCB", "CB", "LCB", "RWB", "RCM", "LCM", "LWB", "RW", "ST", "LW"],
+  "3-5-2": ["GK", "RCB", "CB", "LCB", "RWB", "RCM", "CAM", "LCM", "LWB", "RST", "LST"],
+  "5-3-2": ["GK", "RWB", "RCB", "CB", "LCB", "LWB", "RCM", "CM", "LCM", "RST", "LST"],
+  "5-4-1": ["GK", "RWB", "RCB", "CB", "LCB", "LWB", "RM", "RCM", "LCM", "LM", "ST"],
+  "4-1-4-1": ["GK", "RB", "RCB", "LCB", "LB", "DM", "RM", "RCM", "LCM", "LM", "ST"],
+  "4-3-1-2": ["GK", "RB", "RCB", "LCB", "LB", "RCM", "DM", "LCM", "CAM", "RST", "LST"],
+};
+
+const FORMATION_LINES = {
+  "4-3-3": [1, 4, 3, 3],
+  "4-2-3-1": [1, 4, 2, 3, 1],
+  "4-4-2": [1, 4, 4, 2],
+  "3-4-3": [1, 3, 4, 3],
+  "3-5-2": [1, 3, 5, 2],
+  "5-3-2": [1, 5, 3, 2],
+  "5-4-1": [1, 5, 4, 1],
+  "4-1-4-1": [1, 4, 1, 4, 1],
+  "4-3-1-2": [1, 4, 3, 1, 2],
+};
+
+const FORMATION_PROFILES = {
+  "4-3-3": { attack: 1.02, defence: 1 },
+  "4-2-3-1": { attack: 1.01, defence: 1.01 },
+  "4-4-2": { attack: 1, defence: 1 },
+  "3-4-3": { attack: 1.025, defence: 0.98 },
+  "3-5-2": { attack: 1.01, defence: 1.01 },
+  "5-3-2": { attack: 0.98, defence: 1.03 },
+  "5-4-1": { attack: 0.96, defence: 1.04 },
+  "4-1-4-1": { attack: 0.98, defence: 1.025 },
+  "4-3-1-2": { attack: 1.015, defence: 0.99 },
+};
 
 const TEAM_ALIASES = new Map([
   ["Hearts", "Heart of Midlothian"],
@@ -585,6 +622,28 @@ const COMPETITIONS = {
         ],
       },
       {
+        id: 0.5,
+        name: "First Qualifying Round - Second Legs",
+        startDate: "2026-07-14",
+        endDate: "2026-07-15",
+        fixtures: [
+          { date: "2026-07-14", time: "16:00", home: "KuPS Kuopio", away: "Vardar" },
+          { date: "2026-07-14", time: "17:00", home: "Iberia Tbilisi", away: "Flora Tallinn" },
+          { date: "2026-07-14", time: "18:00", home: "Riga", away: "Ararat-Armenia" },
+          { date: "2026-07-14", time: "18:00", home: "Gyori ETO", away: "Vikingur Reykjavik" },
+          { date: "2026-07-14", time: "18:30", home: "The New Saints", away: "Sabah" },
+          { date: "2026-07-14", time: "18:30", home: "Levski Sofia", away: "Borac" },
+          { date: "2026-07-14", time: "19:00", home: "Inter Escaldes", away: "Lincoln Red Imps" },
+          { date: "2026-07-14", time: "19:00", home: "Drita", away: "Kauno Zalgiris" },
+          { date: "2026-07-14", time: "20:00", home: "Shamrock Rovers", away: "Floriana" },
+          { date: "2026-07-14", time: "20:00", home: "Larne", away: "Tre Fiori" },
+          { date: "2026-07-15", time: "18:30", home: "Universitatea Craiova", away: "Maxline Vitebsk" },
+          { date: "2026-07-15", time: "19:15", home: "Atert Bissen", away: "Klaksvik" },
+          { date: "2026-07-15", time: "20:00", home: "Egnatia Rrogozhine", away: "Petrocub Hincesti" },
+          { date: "2026-07-15", time: "20:00", home: "Sutjeska Niksic", away: "Kairat" },
+        ],
+      },
+      {
         id: 1,
         name: "League Phase Matchday 1",
         startDate: "2026-09-08",
@@ -667,10 +726,31 @@ const COMPETITIONS = {
     gameweeks: [
       {
         id: 0,
-        name: "First Qualifying Round - Live Fixtures",
+        name: "First Qualifying Round - First Legs",
         startDate: "2026-07-09",
         endDate: "2026-07-09",
-        fixtures: [],
+        fixtures: [
+          { date: "2026-07-09", time: "17:00", home: "Qarabag", away: "Vestri" },
+          { date: "2026-07-09", time: "18:00", home: "Dynamo Kyiv", away: "Universitatea Cluj" },
+          { date: "2026-07-09", time: "18:00", home: "Sheriff", away: "Aluminij" },
+          { date: "2026-07-09", time: "19:00", home: "CSKA Sofia", away: "Derry City" },
+          { date: "2026-07-09", time: "19:00", home: "Hajduk Split", away: "Zilina" },
+          { date: "2026-07-09", time: "19:00", home: "Vojvodina", away: "Ferencvaros" },
+        ],
+      },
+      {
+        id: 0.5,
+        name: "First Qualifying Round - Second Legs",
+        startDate: "2026-07-16",
+        endDate: "2026-07-16",
+        fixtures: [
+          { date: "2026-07-16", time: "18:30", home: "Derry City", away: "CSKA Sofia" },
+          { date: "2026-07-16", time: "18:30", home: "Universitatea Cluj", away: "Dynamo Kyiv" },
+          { date: "2026-07-16", time: "19:00", home: "Aluminij", away: "Sheriff" },
+          { date: "2026-07-16", time: "19:15", home: "Ferencvaros", away: "Vojvodina" },
+          { date: "2026-07-16", time: "19:30", home: "Zilina", away: "Hajduk Split" },
+          { date: "2026-07-16", time: "21:00", home: "Vestri", away: "Qarabag" },
+        ],
       },
       {
         id: 1,
@@ -755,10 +835,66 @@ const COMPETITIONS = {
     gameweeks: [
       {
         id: 0,
-        name: "First Qualifying Round - Live Fixtures",
+        name: "First Qualifying Round - First Legs",
         startDate: "2026-07-09",
         endDate: "2026-07-09",
-        fixtures: [],
+        fixtures: [
+          { date: "2026-07-09", time: "15:00", home: "Atletic Club d'Escaldes", away: "Mornar" },
+          { date: "2026-07-09", time: "17:00", home: "Alashkert", away: "Elimai" },
+          { date: "2026-07-09", time: "17:00", home: "Dila", away: "Virtus" },
+          { date: "2026-07-09", time: "17:00", home: "Hegelmann", away: "Paide" },
+          { date: "2026-07-09", time: "17:00", home: "Kalju", away: "Linfield" },
+          { date: "2026-07-09", time: "17:00", home: "Liepaja", away: "Decic" },
+          { date: "2026-07-09", time: "18:00", home: "Bohemians", away: "St Joseph's" },
+          { date: "2026-07-09", time: "18:00", home: "Dinamo-Minsk", away: "Sileks" },
+          { date: "2026-07-09", time: "18:00", home: "Marsaxlokk", away: "Pyunik" },
+          { date: "2026-07-09", time: "18:00", home: "Velez", away: "Milsami" },
+          { date: "2026-07-09", time: "18:15", home: "Mondorf", away: "Dinamo Tbilisi" },
+          { date: "2026-07-09", time: "18:30", home: "Caernarfon", away: "Levadia Tallinn" },
+          { date: "2026-07-09", time: "18:30", home: "Europa", away: "Shkendija" },
+          { date: "2026-07-09", time: "19:00", home: "Vllaznia", away: "Malisheva" },
+          { date: "2026-07-09", time: "19:00", home: "Stjarnan", away: "Vikingur" },
+          { date: "2026-07-09", time: "19:30", home: "Glentoran", away: "RFS" },
+          { date: "2026-07-09", time: "19:45", home: "Penybont", away: "FC Santa Coloma" },
+          { date: "2026-07-09", time: "19:45", home: "Petrovac", away: "Zalgiris" },
+          { date: "2026-07-09", time: "19:45", home: "Runavik", away: "Hamrun Spartans" },
+          { date: "2026-07-09", time: "20:00", home: "Dinamo City", away: "Astana" },
+          { date: "2026-07-09", time: "20:00", home: "Sarajevo", away: "Inter Turku" },
+        ],
+      },
+      {
+        id: 0.5,
+        name: "First Qualifying Round - Second Legs",
+        startDate: "2026-07-14",
+        endDate: "2026-07-16",
+        fixtures: [
+          { date: "2026-07-14", time: "20:00", home: "La Fiorita", away: "UNA Strassen" },
+          { date: "2026-07-15", time: "15:30", home: "Malisheva", away: "Vllaznia" },
+          { date: "2026-07-15", time: "19:30", home: "Decic", away: "Liepaja" },
+          { date: "2026-07-16", time: "16:00", home: "Astana", away: "Dinamo City" },
+          { date: "2026-07-16", time: "16:00", home: "Elimai", away: "Alashkert" },
+          { date: "2026-07-16", time: "16:00", home: "Inter Turku", away: "Sarajevo" },
+          { date: "2026-07-16", time: "17:00", home: "Ilves", away: "Differdange" },
+          { date: "2026-07-16", time: "17:00", home: "Paide", away: "Hegelmann" },
+          { date: "2026-07-16", time: "17:00", home: "Pyunik", away: "Marsaxlokk" },
+          { date: "2026-07-16", time: "17:00", home: "St Joseph's", away: "Bohemians" },
+          { date: "2026-07-16", time: "17:00", home: "Torpedo Kutaisi", away: "Zire" },
+          { date: "2026-07-16", time: "17:30", home: "Levadia Tallinn", away: "Caernarfon" },
+          { date: "2026-07-16", time: "17:30", home: "RFS", away: "Glentoran" },
+          { date: "2026-07-16", time: "18:00", home: "BATE", away: "Elbasani" },
+          { date: "2026-07-16", time: "18:00", home: "Dinamo Tbilisi", away: "Mondorf" },
+          { date: "2026-07-16", time: "18:00", home: "FC Santa Coloma", away: "Penybont" },
+          { date: "2026-07-16", time: "18:00", home: "Milsami", away: "Velez" },
+          { date: "2026-07-16", time: "18:00", home: "Vikingur", away: "Stjarnan" },
+          { date: "2026-07-16", time: "18:00", home: "Zalgiris", away: "Petrovac" },
+          { date: "2026-07-16", time: "18:30", home: "Hamrun Spartans", away: "Runavik" },
+          { date: "2026-07-16", time: "19:00", home: "Ballkani", away: "Connah's Quay" },
+          { date: "2026-07-16", time: "19:00", home: "Shkendija", away: "Europa" },
+          { date: "2026-07-16", time: "19:00", home: "Sileks", away: "Dinamo-Minsk" },
+          { date: "2026-07-16", time: "19:45", home: "Linfield", away: "Kalju" },
+          { date: "2026-07-16", time: "19:45", home: "Mornar", away: "Atletic Club d'Escaldes" },
+          { date: "2026-07-16", time: "20:00", home: "Virtus", away: "Dila" },
+        ],
       },
       {
         id: 1,
@@ -784,12 +920,16 @@ const COMPETITIONS = {
 let activeCompetitionId = localStorage.getItem("football-model-active-competition") || "spfl";
 let hasSelectedCompetition = localStorage.getItem("football-model-has-selected-competition") === "true";
 let activePage = "home";
-let activeView = localStorage.getItem("football-model-active-view-v2") || "performance";
+let activeView = ["predictions", "backtest"].includes(localStorage.getItem("football-model-active-view-v2"))
+  ? localStorage.getItem("football-model-active-view-v2")
+  : "predictions";
 let state;
 let lineupRenderTimer;
 let backtestCache = {};
 let performanceSummaryCache = null;
 let liveRefreshTimer;
+let finishedFixtureTimer;
+const openFixtureKeys = new Set();
 
 const el = (id) => document.getElementById(id);
 const TODAYS_MATCHES_ID = "todays-matches";
@@ -801,11 +941,34 @@ const todayDateString = () => {
   return `${year}-${month}-${day}`;
 };
 const competitionIds = () => Object.keys(COMPETITIONS);
+
+function ukComparableNow() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day), Number(values.hour), Number(values.minute));
+}
+
+function fixtureFinishWindowPassed(fixture) {
+  if (!fixture?.date || !/^\d{2}:\d{2}$/.test(String(fixture.time || ""))) return false;
+  const [year, month, day] = fixture.date.split("-").map(Number);
+  const [hour, minute] = fixture.time.split(":").map(Number);
+  const scheduledKickoff = Date.UTC(year, month - 1, day, hour, minute);
+  return ukComparableNow() >= scheduledKickoff + 150 * 60 * 1000;
+}
+
 function fixturesForDate(date) {
   return competitionIds().flatMap((competitionId) =>
     COMPETITIONS[competitionId].gameweeks.flatMap((week) =>
       week.fixtures
-        .filter((fixture) => fixture.date === date)
+        .filter((fixture) => fixture.date === date && !fixtureFinishWindowPassed(fixture))
         .map((fixture) => ({
           ...fixture,
           competitionId,
@@ -877,9 +1040,11 @@ function createInitialState(competitionId) {
     odds: {},
     sourceLinks: {},
     live: {},
+    apiStatus: null,
     source: matches.length ? "Bundled Football-Data CSV archive" : "Fallback calibration",
     synthetic: !matches.length,
     updatedAt: new Date().toISOString(),
+    fixtureSchemaVersion: FIXTURE_SCHEMA_VERSION,
     competitionId,
     note: config.note || "",
   };
@@ -891,6 +1056,12 @@ function clamp(value, min, max) {
 
 function pct(value) {
   return `${Math.round(value * 100)}%`;
+}
+
+function confidenceStyle(value) {
+  const confidence = clamp(Number(value) || 0, 0, 1);
+  const hue = Math.round(confidence * 120);
+  return `--confidence-hue:${hue}`;
 }
 
 function decimal(value) {
@@ -1037,6 +1208,71 @@ function getSourceLinks(fixture) {
   return state.sourceLinks?.[fixtureKey(fixture)] || {};
 }
 
+function getManualInputs(fixture) {
+  return getSourceLinks(fixture);
+}
+
+function hasEnteredStats(inputs) {
+  if (!inputs || typeof inputs !== "object") return false;
+  const numericStats = ["homeXgScored", "homeXgConceded", "awayXgScored", "awayXgConceded", "homeXg", "awayXg"];
+  return numericStats.some((key) => Number.isFinite(parseManualNumber(inputs[key]))) ||
+    Boolean(String(inputs.notes || inputs.statsSignal || "").trim());
+}
+
+function formationOptions(selected = "4-3-3") {
+  return Object.keys(FORMATIONS)
+    .map((formation) => `<option value="${formation}"${formation === selected ? " selected" : ""}>${formation}</option>`)
+    .join("");
+}
+
+function manualLineupPlayers(inputs, side) {
+  const players = inputs?.[`${side}StartingXI`];
+  return Array.isArray(players) ? players.slice(0, 11) : [];
+}
+
+function lineupTextFromInputs(inputs, side) {
+  return manualLineupPlayers(inputs, side).filter(Boolean).join(", ");
+}
+
+function renderLineupPlayerFields(side, formation, players = []) {
+  const positions = FORMATIONS[formation] || FORMATIONS["4-3-3"];
+  const lines = FORMATION_LINES[formation] || FORMATION_LINES["4-3-3"];
+  let playerIndex = 0;
+  return lines.map((lineSize, lineIndex) => {
+    const fields = positions.slice(playerIndex, playerIndex + lineSize).map((position) => {
+      const index = playerIndex;
+      playerIndex += 1;
+      return `
+        <label class="player-position">
+          <span>${position}</span>
+          <input data-lineup-player data-lineup-side="${side}" data-lineup-index="${index}" type="text"
+            value="${escapeHtml(players[index] || "")}" placeholder="Player" autocomplete="off">
+        </label>
+      `;
+    }).join("");
+    return `<div class="formation-line formation-line--${lineIndex + 1}" data-line-size="${lineSize}">${fields}</div>`;
+  }).join("");
+}
+
+function formationProfile(value) {
+  return FORMATION_PROFILES[value] || { attack: 1, defence: 1 };
+}
+
+function parseManualNumber(value) {
+  const num = Number(String(value || "").trim());
+  return Number.isFinite(num) ? num : null;
+}
+
+function statNotesImpact(notes) {
+  const text = String(notes || "").toLowerCase();
+  let goals = 1;
+  if (/high tempo|open game|end to end|attacking|high xg|many chances|shots|pressing/i.test(text)) goals += 0.06;
+  if (/low tempo|cagey|defensive|low block|few chances|rotation risk|fatigue/i.test(text)) goals -= 0.06;
+  if (/strong attack|key forward fit|first choice attack|creative midfielder fit/i.test(text)) goals += 0.04;
+  if (/missing striker|key forward out|creative midfielder out|weakened attack/i.test(text)) goals -= 0.05;
+  return clamp(goals, 0.86, 1.14);
+}
+
 function safeSourceUrl(value) {
   const text = String(value || "").trim();
   return /^https?:\/\//i.test(text) ? text : "";
@@ -1059,6 +1295,7 @@ function extractDecimalNear(text, labels) {
   const source = String(text || "");
   const parsePrice = (value) => {
     const raw = String(value || "").trim();
+    if (/^(evs|evens)$/i.test(raw)) return 2;
     const fraction = raw.match(/^(\d{1,3})\/(\d{1,3})$/);
     if (fraction) {
       const top = Number(fraction[1]);
@@ -1069,8 +1306,8 @@ function extractDecimalNear(text, labels) {
   };
   for (const label of labels.filter(Boolean)) {
     const escaped = regexEscape(label);
-    const pricePattern = "(\\d{1,3}\\/\\d{1,3}|[1-9][0-9]?(?:\\.\\d{1,3})?)";
-    const after = source.match(new RegExp(`${escaped}[^0-9/]{0,40}${pricePattern}`, "i"));
+    const pricePattern = "(\\d{1,3}\\/\\d{1,3}|evs|evens|[1-9][0-9]?(?:\\.\\d{1,3})?)";
+    const after = source.match(new RegExp(`${escaped}(?:\\s|[^A-Za-z0-9/]){0,40}${pricePattern}`, "i"));
     if (after) return parsePrice(after[1]);
     const before = source.match(new RegExp(`${pricePattern}[^A-Za-z0-9/]{0,24}${escaped}`, "i"));
     if (before) return parsePrice(before[1]);
@@ -1114,6 +1351,32 @@ async function scanSourceUrl(url) {
   }
 }
 
+function rememberOpenFixtures() {
+  document.querySelectorAll(".fixture-card[data-fixture-key] .fixture-details").forEach((details) => {
+    const card = details.closest("[data-fixture-key]");
+    if (!card?.dataset.fixtureKey) return;
+    if (details.open) {
+      openFixtureKeys.add(card.dataset.fixtureKey);
+    } else {
+      openFixtureKeys.delete(card.dataset.fixtureKey);
+    }
+  });
+}
+
+function attachFixtureDetailListeners() {
+  document.querySelectorAll(".fixture-card[data-fixture-key] .fixture-details").forEach((details) => {
+    details.addEventListener("toggle", () => {
+      const card = details.closest("[data-fixture-key]");
+      if (!card?.dataset.fixtureKey) return;
+      if (details.open) {
+        openFixtureKeys.add(card.dataset.fixtureKey);
+      } else {
+        openFixtureKeys.delete(card.dataset.fixtureKey);
+      }
+    });
+  });
+}
+
 function normalName(value) {
   return normalizeTeam(value).toLowerCase().replace(/[^a-z0-9]/g, "");
 }
@@ -1148,6 +1411,8 @@ function addFixtureFromLiveGame(game) {
   if (!liveGameBelongsInWeek(game, week)) return null;
   const duplicate = week.fixtures.find((fixture) => teamMatch(fixture.home, game.home) && teamMatch(fixture.away, game.away));
   if (duplicate) return duplicate;
+  const fixtureCompetition = game.competitionId || activeCompetitionId;
+  if (UEFA_BLEND_COMPETITIONS.has(fixtureCompetition)) return null;
   const fixture = {
     date: game.date,
     time: game.time || "TBC",
@@ -1193,6 +1458,10 @@ function normaliseCsvDate(value) {
 
 function normaliseStateShape() {
   if (!Array.isArray(state.gameweeks) || !state.gameweeks.length) state.gameweeks = cloneGameweeks(activeCompetitionId);
+  if (UEFA_BLEND_COMPETITIONS.has(activeCompetitionId) && Number(state.fixtureSchemaVersion || 0) < FIXTURE_SCHEMA_VERSION) {
+    state.gameweeks = cloneGameweeks(activeCompetitionId);
+    state.fixtureSchemaVersion = FIXTURE_SCHEMA_VERSION;
+  }
   if (!Array.isArray(state.matches)) state.matches = [];
   const bundled = bundledMatches(activeCompetitionId);
   if (bundled.length && (state.synthetic || state.source === "Fallback calibration")) {
@@ -1204,6 +1473,7 @@ function normaliseStateShape() {
   if (!state.odds || typeof state.odds !== "object") state.odds = {};
   if (!state.sourceLinks || typeof state.sourceLinks !== "object") state.sourceLinks = {};
   if (!state.live || typeof state.live !== "object") state.live = {};
+  if (!("apiStatus" in state)) state.apiStatus = null;
   if (typeof state.synthetic !== "boolean") state.synthetic = state.source === "Fallback calibration" && !bundled.length;
   state.currentGameweek = clamp(Number(state.currentGameweek) || 0, 0, state.gameweeks.length - 1);
 }
@@ -1286,6 +1556,10 @@ function realCompletedMatches() {
   return state.matches.filter((match) => !match.synthetic);
 }
 
+function backtestCompletedMatches() {
+  return realCompletedMatches().filter((match) => match.backtestEligible === true && match.predictionSnapshot);
+}
+
 const DOMESTIC_BLEND_COMPETITIONS = ["premier-league", "ligue-1", "bundesliga", "la-liga", "serie-a", "primeira-liga", "spfl"];
 const UEFA_BLEND_COMPETITIONS = new Set(["champions-league", "europa-league", "conference-league"]);
 
@@ -1322,6 +1596,13 @@ function blendedModelMatches(modelMatches = state.matches) {
 function loadState() {
   if (activeCompetitionId === TODAYS_MATCHES_ID) {
     state = createInitialState(activeCompetitionId);
+    try {
+      const savedToday = JSON.parse(localStorage.getItem(activeConfig().storageKey) || "null");
+      if (savedToday?.sourceLinks && typeof savedToday.sourceLinks === "object") state.sourceLinks = savedToday.sourceLinks;
+      if (savedToday?.lineups && typeof savedToday.lineups === "object") state.lineups = savedToday.lineups;
+    } catch {
+      localStorage.removeItem(activeConfig().storageKey);
+    }
     normaliseStateShape();
     return;
   }
@@ -1352,6 +1633,11 @@ function populateSelect(select) {
 function buildTeamModel(matches = state.matches) {
   const formWeight = MODEL_SETTINGS.formWeight;
   const totals = { homeGoals: 0, awayGoals: 0, games: 0 };
+  const orderedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const newestMatchTime = orderedMatches.reduce((latest, match) => {
+    const time = new Date(match.date).getTime();
+    return Number.isFinite(time) ? Math.max(latest, time) : latest;
+  }, 0);
   const allTeamNames = [...new Set([...activeTeams(), ...matches.flatMap((match) => [match.home, match.away])])];
   const priors = activeConfig().priors || {};
   const team = Object.fromEntries(
@@ -1361,13 +1647,14 @@ function buildTeamModel(matches = state.matches) {
     }),
   );
 
-  [...matches].sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((match, index, ordered) => {
+  orderedMatches.forEach((match) => {
     const home = team[match.home];
     const away = team[match.away];
     if (!home || !away) return;
-    const age = ordered.length - index - 1;
+    const matchTime = new Date(match.date).getTime();
+    const ageDays = newestMatchTime && Number.isFinite(matchTime) ? Math.max(0, (newestMatchTime - matchTime) / 86400000) : 0;
     const matchWeight = Number.isFinite(Number(match.weight)) ? Number(match.weight) : 1;
-    const recency = (0.18 + (1 - 0.18) * Math.exp((-age * formWeight) / 190)) * matchWeight;
+    const recency = (0.08 + 0.92 * Math.exp((-ageDays * formWeight) / 365)) * matchWeight;
 
     totals.homeGoals += match.hg * matchWeight;
     totals.awayGoals += match.ag * matchWeight;
@@ -1380,8 +1667,10 @@ function buildTeamModel(matches = state.matches) {
     away.attackAgainst += match.hg * recency;
 
     const homeResult = match.hg > match.ag ? 1 : match.hg === match.ag ? 0.5 : 0;
-    const expectedHome = 1 / (1 + Math.pow(10, (away.elo - home.elo) / 400));
-    const change = 20 * matchWeight * (Math.log(Math.abs(match.hg - match.ag) + 1) + 1) * (homeResult - expectedHome);
+    const expectedHome = 1 / (1 + Math.pow(10, (away.elo - (home.elo + 55)) / 400));
+    const goalMargin = Math.min(2.25, 1 + Math.log1p(Math.abs(match.hg - match.ag)) * 0.55);
+    const ratingWeight = clamp(Math.sqrt(matchWeight), 0.35, 1.8);
+    const change = 18 * ratingWeight * goalMargin * (homeResult - expectedHome);
     home.elo += change;
     away.elo -= change;
     home.recent = [...home.recent, match.hg - match.ag].slice(-8);
@@ -1401,8 +1690,9 @@ function buildTeamModel(matches = state.matches) {
     const played = Math.max(1, t.played);
     const dataAttack = (t.attackFor / played) / ((avgHome + avgAway) / 2);
     const dataDefence = (t.attackAgainst / played) / ((avgHome + avgAway) / 2);
-    t.attack = dataAttack * 0.86 + t.prior * 0.14;
-    t.defence = dataDefence * 0.86 + clamp(2 - t.prior, 0.72, 1.28) * 0.14;
+    const reliability = clamp(t.played / (t.played + 8), 0.12, 0.94);
+    t.attack = dataAttack * reliability + t.prior * (1 - reliability);
+    t.defence = dataDefence * reliability + clamp(2 - t.prior, 0.72, 1.28) * (1 - reliability);
     t.form = t.recent.length ? t.recent.reduce((sum, value) => sum + value, 0) / t.recent.length : 0;
   });
 
@@ -1478,17 +1768,24 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
   const a = model.team[fixture.away] || { elo: 1500, attack: 1, defence: 1, form: 0 };
   const eloGap = (h.elo - a.elo) / 420;
   const formGap = (h.form - a.form) / 10;
-  const homeLineup = useLineups ? lineupImpact(getLineup(fixture, "home")) : 1;
-  const awayLineup = useLineups ? lineupImpact(getLineup(fixture, "away")) : 1;
+  const manualInputs = useLineups ? getManualInputs(fixture) : {};
+  const homeLineup = useLineups ? lineupImpact(`${getLineup(fixture, "home")} ${lineupTextFromInputs(manualInputs, "home")} ${manualInputs.homeNews || ""}`) : 1;
+  const awayLineup = useLineups ? lineupImpact(`${getLineup(fixture, "away")} ${lineupTextFromInputs(manualInputs, "away")} ${manualInputs.awayNews || ""}`) : 1;
+  const homeFormation = useLineups ? formationProfile(manualInputs.homeFormation) : { attack: 1, defence: 1 };
+  const awayFormation = useLineups ? formationProfile(manualInputs.awayFormation) : { attack: 1, defence: 1 };
   const h2h = headToHeadAdjustment(fixture.home, fixture.away, preparedMatches);
   const liveXg = state.live?.[fixtureKey(fixture)]?.xg;
+  const homeXgScored = parseManualNumber(manualInputs.homeXgScored ?? manualInputs.homeXg);
+  const homeXgConceded = parseManualNumber(manualInputs.homeXgConceded);
+  const awayXgScored = parseManualNumber(manualInputs.awayXgScored ?? manualInputs.awayXg);
+  const awayXgConceded = parseManualNumber(manualInputs.awayXgConceded);
   let homeLambda = clamp(
-    model.avgHome * (0.72 + h.attack * 0.38) * (0.78 + a.defence * 0.24) * (1 + MODEL_SETTINGS.homeBoost + eloGap * 0.08 + formGap) * homeLineup * h2h.home,
+    model.avgHome * (0.72 + h.attack * 0.38) * (0.78 + a.defence * 0.24) * (1 + MODEL_SETTINGS.homeBoost + eloGap * 0.08 + formGap) * homeLineup * (homeFormation.attack / awayFormation.defence) * h2h.home,
     0.2,
     3.8,
   );
   let awayLambda = clamp(
-    model.avgAway * (0.72 + a.attack * 0.36) * (0.82 + h.defence * 0.22) * (1 - MODEL_SETTINGS.homeBoost * 0.35 - eloGap * 0.07 - formGap * 0.6) * awayLineup * h2h.away,
+    model.avgAway * (0.72 + a.attack * 0.36) * (0.82 + h.defence * 0.22) * (1 - MODEL_SETTINGS.homeBoost * 0.35 - eloGap * 0.07 - formGap * 0.6) * awayLineup * (awayFormation.attack / homeFormation.defence) * h2h.away,
     0.15,
     3.4,
   );
@@ -1496,6 +1793,21 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
     homeLambda = clamp(homeLambda * 0.72 + Number(liveXg.home) * 0.28, 0.2, 3.8);
     awayLambda = clamp(awayLambda * 0.72 + Number(liveXg.away) * 0.28, 0.15, 3.4);
   }
+  if (Number.isFinite(homeXgScored) || Number.isFinite(awayXgConceded)) {
+    const homeAttackSignal = Number.isFinite(homeXgScored) ? homeXgScored : homeLambda;
+    const awayDefenceSignal = Number.isFinite(awayXgConceded) ? awayXgConceded : homeLambda;
+    const homeXgSignal = homeAttackSignal * 0.58 + awayDefenceSignal * 0.42;
+    homeLambda = clamp(homeLambda * 0.6 + homeXgSignal * 0.4, 0.2, 3.8);
+  }
+  if (Number.isFinite(awayXgScored) || Number.isFinite(homeXgConceded)) {
+    const awayAttackSignal = Number.isFinite(awayXgScored) ? awayXgScored : awayLambda;
+    const homeDefenceSignal = Number.isFinite(homeXgConceded) ? homeXgConceded : awayLambda;
+    const awayXgSignal = awayAttackSignal * 0.52 + homeDefenceSignal * 0.48;
+    awayLambda = clamp(awayLambda * 0.66 + awayXgSignal * 0.34, 0.15, 3.4);
+  }
+  const notesMultiplier = statNotesImpact(manualInputs.notes);
+  homeLambda = clamp(homeLambda * notesMultiplier, 0.2, 3.8);
+  awayLambda = clamp(awayLambda * notesMultiplier, 0.15, 3.4);
 
   let homeWin = 0;
   let draw = 0;
@@ -1503,18 +1815,29 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
   let btts = 0;
   let over25 = 0;
   let bestScore = { home: 0, away: 0, value: 0 };
+  const scoreCells = [];
+  const lowScoreCorrelation = -0.075;
 
   for (let hg = 0; hg <= 8; hg += 1) {
     for (let ag = 0; ag <= 8; ag += 1) {
-      const p = poisson(homeLambda, hg) * poisson(awayLambda, ag);
-      if (hg > ag) homeWin += p;
-      if (hg === ag) draw += p;
-      if (ag > hg) awayWin += p;
-      if (hg > 0 && ag > 0) btts += p;
-      if (hg + ag > 2.5) over25 += p;
-      if (p > bestScore.value) bestScore = { home: hg, away: ag, value: p };
+      let correction = 1;
+      if (hg === 0 && ag === 0) correction = 1 - homeLambda * awayLambda * lowScoreCorrelation;
+      if (hg === 0 && ag === 1) correction = 1 + homeLambda * lowScoreCorrelation;
+      if (hg === 1 && ag === 0) correction = 1 + awayLambda * lowScoreCorrelation;
+      if (hg === 1 && ag === 1) correction = 1 - lowScoreCorrelation;
+      scoreCells.push({ hg, ag, value: Math.max(0, poisson(homeLambda, hg) * poisson(awayLambda, ag) * correction) });
     }
   }
+  const scoreTotal = scoreCells.reduce((sum, cell) => sum + cell.value, 0) || 1;
+  scoreCells.forEach((cell) => {
+    const p = cell.value / scoreTotal;
+    if (cell.hg > cell.ag) homeWin += p;
+    if (cell.hg === cell.ag) draw += p;
+    if (cell.ag > cell.hg) awayWin += p;
+    if (cell.hg > 0 && cell.ag > 0) btts += p;
+    if (cell.hg + cell.ag > 2.5) over25 += p;
+    if (p > bestScore.value) bestScore = { home: cell.hg, away: cell.ag, value: p };
+  });
   let goalLineOffset = 0;
 
   draw = clamp(draw * (1 + MODEL_SETTINGS.drawTune), 0.04, 0.42);
@@ -1612,18 +1935,14 @@ function predictFixture(fixture, modelMatches = state.matches, useLineups = true
 }
 
 function predictionBacktest() {
-  const completed = realCompletedMatches();
-  if (completed.length < 80) return { sample: 0, oneXTwo: 0, brier: 0, btts: 0, ou25: 0, exact: 0, favorite: 0, valueBets: 0, valueRoi: 0 };
+  const completed = backtestCompletedMatches();
+  if (!completed.length) return { sample: 0, oneXTwo: 0, brier: 0, btts: 0, ou25: 0, exact: 0, favorite: 0, valueBets: 0, valueRoi: 0 };
   const cacheKey = `${activeCompetitionId}:${completed.length}`;
   if (backtestCache[cacheKey]) return backtestCache[cacheKey];
   const ordered = [...completed]
-    .filter((match) => activeTeams().includes(match.home) && activeTeams().includes(match.away))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
-  const warmup = Math.min(420, Math.floor(ordered.length * 0.55));
-  const sample = ordered.slice(warmup).slice(-180);
-  if (sample.length < 40) {
-    return { sample: sample.length, oneXTwo: 0, brier: 0, btts: 0, ou25: 0, exact: 0, favorite: 0 };
-  }
+  const sample = ordered.slice(-180);
+  if (!sample.length) return { sample: 0, oneXTwo: 0, brier: 0, btts: 0, ou25: 0, exact: 0, favorite: 0 };
 
   let oneXTwo = 0;
   let brier = 0;
@@ -1635,7 +1954,7 @@ function predictionBacktest() {
   let valueProfit = 0;
   sample.forEach((match) => {
     const priorMatches = ordered.filter((item) => new Date(item.date) < new Date(match.date));
-    const p = predictFixture({ home: match.home, away: match.away, date: match.date }, priorMatches, false);
+    const p = match.predictionSnapshot || predictFixture({ home: match.home, away: match.away, date: match.date }, priorMatches, false);
     const actual = match.hg > match.ag ? "H" : match.hg === match.ag ? "D" : "A";
     const predicted = p.homeWin > p.draw && p.homeWin > p.awayWin ? "H" : p.draw > p.awayWin ? "D" : "A";
     if (actual === predicted) oneXTwo += 1;
@@ -1680,7 +1999,11 @@ function withCompetition(competitionId, callback) {
   const previousState = state;
   try {
     activeCompetitionId = competitionId;
-    state = createInitialState(competitionId);
+    try {
+      state = JSON.parse(localStorage.getItem(COMPETITIONS[competitionId].storageKey) || "null") || createInitialState(competitionId);
+    } catch {
+      state = createInitialState(competitionId);
+    }
     normaliseStateShape();
     return callback();
   } finally {
@@ -1744,6 +2067,11 @@ function activeCompetitionTrend(limit = 360) {
 
 function renderPredictions() {
   const grid = el("predictionGrid");
+  if (activeCompetitionId === TODAYS_MATCHES_ID) {
+    state.gameweeks.forEach((gameweek) => {
+      gameweek.fixtures = gameweek.fixtures.filter((fixture) => !fixtureFinishWindowPassed(fixture));
+    });
+  }
   const week = getActiveGameweek();
   if (!week || !week.fixtures.length) {
     const message = UEFA_BLEND_COMPETITIONS.has(activeCompetitionId) || activeCompetitionId === TODAYS_MATCHES_ID
@@ -1757,25 +2085,14 @@ function renderPredictions() {
     .map((fixture) => {
       const key = fixtureKey(fixture);
       const p = predictFixture(fixture);
-      const odds = state.odds?.[key] || {};
-      const live = state.live?.[key] || {};
-      const sources = getSourceLinks(fixture);
-      const sourceButtons = [
-        ["Lineups", sources.lineups],
-        ["Odds", sources.odds],
-        ["Stats", sources.stats],
-      ]
-        .map(([label, url]) => ({ label, url: safeSourceUrl(url) }))
-        .filter((item) => item.url);
       const confidence = Math.max(p.winner.value, p.doubleChance.value, p.btts.value, p.goals.value);
       const result = fixtureResult(fixture);
+      const inputs = getManualInputs(fixture);
       const competitionLabel = fixture.competitionLabel ? `${escapeHtml(fixture.competitionLabel)} &middot; ` : "";
       const resultLabel = result ? `Result ${result.hg}-${result.ag}` : formatFixtureDate(fixture);
-      const updatedValue = predictionUpdatedAt(key);
-      const updatedLabel = updatedValue ? `${formatUpdateTime(updatedValue)} UK` : "Not yet updated";
       return `
         <article class="card fixture-card" data-fixture-key="${escapeHtml(key)}">
-          <details class="fixture-details">
+          <details class="fixture-details"${openFixtureKeys.has(key) ? " open" : ""}>
             <summary class="fixture-summary">
               <div>
                 <span>${competitionLabel}${escapeHtml(week.name)} &middot; ${resultLabel}</span>
@@ -1784,92 +2101,63 @@ function renderPredictions() {
               <b>${p.score}</b>
             </summary>
             <div class="fixture-body">
-              <div class="prediction-updated">
-                <span>Prediction last updated</span>
-                <strong>${escapeHtml(updatedLabel)}</strong>
+              <div class="prediction-core">
+                <div class="scoreline confidence-scale" style="${confidenceStyle(p.scoreConfidence)}">
+                  <span>Predicted score</span>
+                  <strong>${p.score}</strong>
+                  <em>${pct(p.scoreConfidence)} confidence</em>
+                </div>
+                <div class="market confidence-scale" style="${confidenceStyle(p.winner.value)}"><span>Predicted result</span><strong>${escapeHtml(p.winner.label)}</strong><em>${pct(p.winner.value)} confidence</em></div>
+                <div class="market confidence-scale" style="${confidenceStyle(p.doubleChance.value)}"><span>Double chance</span><strong>${escapeHtml(p.doubleChance.label)}</strong><em>${pct(p.doubleChance.value)} confidence</em></div>
+                <div class="market confidence-scale" style="${confidenceStyle(p.btts.value)}"><span>BTTS</span><strong>${escapeHtml(p.btts.label)}</strong><em>${pct(p.btts.value)} confidence</em></div>
+                <div class="market confidence-scale" style="${confidenceStyle(p.goals.value)}"><span>Most likely over/under goals</span><strong>${escapeHtml(p.goals.label)}</strong><em>${pct(p.goals.value)} confidence</em></div>
               </div>
-              <div class="scoreline">
-                <span>Predicted score</span>
-                <strong>${p.score}</strong>
-                <em>${pct(p.scoreConfidence)} exact-score model confidence</em>
+              <div class="model-input-panel">
+                <div class="input-head">
+                  <span>Improve prediction</span>
+                  <strong>Manual model inputs</strong>
+                </div>
+                <div class="starting-xi-editor">
+                  ${["home", "away"].map((side) => {
+                    const teamName = side === "home" ? p.home : p.away;
+                    const formation = FORMATIONS[inputs[`${side}Formation`]] ? inputs[`${side}Formation`] : "4-3-3";
+                    return `
+                      <section class="team-sheet" data-team-sheet="${side}">
+                        <div class="team-sheet-head">
+                          <strong>${escapeHtml(teamName)} starting XI</strong>
+                          <label>Formation
+                            <select data-formation-side="${side}">${formationOptions(formation)}</select>
+                          </label>
+                        </div>
+                        <div class="player-fields" data-player-fields="${side}">
+                          ${renderLineupPlayerFields(side, formation, manualLineupPlayers(inputs, side))}
+                        </div>
+                      </section>
+                    `;
+                  }).join("")}
+                </div>
+                <div class="model-input-grid">
+                  <label>${escapeHtml(p.home)} team news<textarea data-model-input="homeNews" rows="3" placeholder="Injuries, suspensions, availability and rotation">${escapeHtml(inputs.homeNews || "")}</textarea></label>
+                  <label>${escapeHtml(p.away)} team news<textarea data-model-input="awayNews" rows="3" placeholder="Injuries, suspensions, availability and rotation">${escapeHtml(inputs.awayNews || "")}</textarea></label>
+                  <label>${escapeHtml(p.home)} xG scored<input data-model-input="homeXgScored" type="number" min="0" max="6" step="0.01" placeholder="e.g. 1.55" value="${escapeHtml(inputs.homeXgScored || inputs.homeXg || "")}"></label>
+                  <label>${escapeHtml(p.home)} xG conceded<input data-model-input="homeXgConceded" type="number" min="0" max="6" step="0.01" placeholder="e.g. 0.95" value="${escapeHtml(inputs.homeXgConceded || "")}"></label>
+                  <label>${escapeHtml(p.away)} xG scored<input data-model-input="awayXgScored" type="number" min="0" max="6" step="0.01" placeholder="e.g. 1.20" value="${escapeHtml(inputs.awayXgScored || inputs.awayXg || "")}"></label>
+                  <label>${escapeHtml(p.away)} xG conceded<input data-model-input="awayXgConceded" type="number" min="0" max="6" step="0.01" placeholder="e.g. 1.40" value="${escapeHtml(inputs.awayXgConceded || "")}"></label>
+                </div>
+                <label class="model-notes">Stat notes<textarea data-model-input="notes" rows="3" placeholder="High tempo, low block, key attacker out, strong attack, fatigue, many shots">${escapeHtml(inputs.notes || "")}</textarea></label>
+                <div class="source-actions">
+                  <button type="button" data-model-submit>Update prediction</button>
+                </div>
               </div>
-              <div class="prob-row"><strong>Home</strong><div class="bar"><span style="width:${pct(p.homeWin)}"></span></div><b>${pct(p.homeWin)}</b></div>
-              <div class="prob-row"><strong>Draw</strong><div class="bar bar--draw"><span style="width:${pct(p.draw)}"></span></div><b>${pct(p.draw)}</b></div>
-              <div class="prob-row"><strong>Away</strong><div class="bar bar--away"><span style="width:${pct(p.awayWin)}"></span></div><b>${pct(p.awayWin)}</b></div>
-          <div class="markets">
-            <div class="market"><span>Winner</span><strong>${escapeHtml(p.winner.label)} ${pct(p.winner.value)}</strong></div>
-            <div class="market"><span>Double chance</span><strong>${escapeHtml(p.doubleChance.label)} ${pct(p.doubleChance.value)}</strong></div>
-            <div class="market"><span>BTTS</span><strong>${p.btts.label} ${pct(p.btts.value)}</strong></div>
-            <div class="market"><span>Most likely goals line</span><strong>${p.goals.label} ${pct(p.goals.value)}</strong></div>
-            <div class="market"><span>Most likely corners line</span><strong>${p.corners.label}${p.corners.value ? ` ${pct(p.corners.value)}` : ""}</strong></div>
-            <div class="market"><span>Player booked</span><strong>${escapeHtml(p.playerMarkets.booked.label)}${p.playerMarkets.booked.value ? ` ${pct(p.playerMarkets.booked.value)}` : ""}</strong></div>
-            <div class="market"><span>Player fouled</span><strong>${escapeHtml(p.playerMarkets.fouled.label)}${p.playerMarkets.fouled.value ? ` ${pct(p.playerMarkets.fouled.value)}` : ""}</strong></div>
-            <div class="market"><span>Player shots</span><strong>${escapeHtml(p.playerMarkets.shots.label)}${p.playerMarkets.shots.value ? ` ${pct(p.playerMarkets.shots.value)}` : ""}</strong></div>
-            <div class="market"><span>Player shots on target</span><strong>${escapeHtml(p.playerMarkets.sot.label)}${p.playerMarkets.sot.value ? ` ${pct(p.playerMarkets.sot.value)}` : ""}</strong></div>
-            <div class="market"><span>Player to score</span><strong>${escapeHtml(p.playerMarkets.scorer.label)}${p.playerMarkets.scorer.value ? ` ${pct(p.playerMarkets.scorer.value)}` : ""}</strong></div>
-          </div>
-          <div class="odds-panel">
-            <div class="odds-head">
-              <span>Bookmaker odds</span>
-              <strong>Value engine</strong>
-            </div>
-            <div class="odds-grid">
-              <label>${escapeHtml(p.home)}<input data-odds-key="home" type="number" step="0.01" min="1.01" placeholder="Home" value="${escapeHtml(odds.home || "")}"></label>
-              <label>Draw<input data-odds-key="draw" type="number" step="0.01" min="1.01" placeholder="Draw" value="${escapeHtml(odds.draw || "")}"></label>
-              <label>${escapeHtml(p.away)}<input data-odds-key="away" type="number" step="0.01" min="1.01" placeholder="Away" value="${escapeHtml(odds.away || "")}"></label>
-              <label>BTTS Yes<input data-odds-key="bttsYes" type="number" step="0.01" min="1.01" placeholder="Yes" value="${escapeHtml(odds.bttsYes || "")}"></label>
-              <label>BTTS No<input data-odds-key="bttsNo" type="number" step="0.01" min="1.01" placeholder="No" value="${escapeHtml(odds.bttsNo || "")}"></label>
-              <label>Over 2.5<input data-odds-key="over25" type="number" step="0.01" min="1.01" placeholder="Over" value="${escapeHtml(odds.over25 || "")}"></label>
-              <label>Under 2.5<input data-odds-key="under25" type="number" step="0.01" min="1.01" placeholder="Under" value="${escapeHtml(odds.under25 || "")}"></label>
-              <label>Over 9.5 corners<input data-odds-key="cornersOver95" type="number" step="0.01" min="1.01" placeholder="Over" value="${escapeHtml(odds.cornersOver95 || "")}"></label>
-              <label>Under 9.5 corners<input data-odds-key="cornersUnder95" type="number" step="0.01" min="1.01" placeholder="Under" value="${escapeHtml(odds.cornersUnder95 || "")}"></label>
-              <label>Booked player<input data-odds-key="playerBooked" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerBooked || "")}"></label>
-              <label>Player 1+ fouled<input data-odds-key="playerFouled1" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerFouled1 || "")}"></label>
-              <label>Player 2+ fouled<input data-odds-key="playerFouled2" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerFouled2 || "")}"></label>
-              <label>Player 3+ fouled<input data-odds-key="playerFouled3" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerFouled3 || "")}"></label>
-              <label>Player 1+ shots<input data-odds-key="playerShots1" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerShots1 || "")}"></label>
-              <label>Player 2+ shots<input data-odds-key="playerShots2" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerShots2 || "")}"></label>
-              <label>Player 3+ shots<input data-odds-key="playerShots3" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerShots3 || "")}"></label>
-              <label>Player 4+ shots<input data-odds-key="playerShots4" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerShots4 || "")}"></label>
-              <label>Player 1+ SOT<input data-odds-key="playerSot1" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerSot1 || "")}"></label>
-              <label>Player 2+ SOT<input data-odds-key="playerSot2" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerSot2 || "")}"></label>
-              <label>Player 3+ SOT<input data-odds-key="playerSot3" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerSot3 || "")}"></label>
-              <label>Player to score<input data-odds-key="playerScorer" type="number" step="0.01" min="1.01" placeholder="Odds" value="${escapeHtml(odds.playerScorer || "")}"></label>
-            </div>
-            ${renderValueSummary(key, p)}
-          </div>
-          <div class="source-panel">
-            <div class="odds-head">
-              <span>Source links</span>
-              <strong>Research inputs</strong>
-            </div>
-            <div class="source-grid">
-              <label>Lineups URL<input data-source-key="lineups" type="url" placeholder="Paste lineup page" value="${escapeHtml(sources.lineups || "")}"></label>
-              <label>Odds URL<input data-source-key="odds" type="url" placeholder="Paste bookmaker/exchange page" value="${escapeHtml(sources.odds || "")}"></label>
-              <label>Stats URL<input data-source-key="stats" type="url" placeholder="Paste stats, xG, shots, corners, cards, or fouls page" value="${escapeHtml(sources.stats || "")}"></label>
-            </div>
-            <label class="source-notes">Research notes<textarea data-source-key="notes" rows="3" placeholder="Paste important notes: injuries, rotation, corners trend, player shots, fouls, bookmaker price notes">${escapeHtml(sources.notes || "")}</textarea></label>
-            ${sources.scanStatus ? `<div class="source-status">${escapeHtml(sources.scanStatus)}</div>` : ""}
-            ${sourceButtons.length ? `<div class="source-links">${sourceButtons.map((item) => `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.label)}</a>`).join("")}</div>` : ""}
-            <div class="source-actions">
-              <button type="button" data-source-submit>Update prediction</button>
-            </div>
-          </div>
-          ${renderLiveNotes(live, odds, sources)}
-          <div class="lineup-editor">
-            <label>${escapeHtml(p.home)} lineup<textarea data-lineup-side="home" rows="4" placeholder="Not yet available">${escapeHtml(getLineup(fixture, "home"))}</textarea></label>
-            <label>${escapeHtml(p.away)} lineup<textarea data-lineup-side="away" rows="4" placeholder="Not yet available">${escapeHtml(getLineup(fixture, "away"))}</textarea></label>
-          </div>
-          <div class="confidence">Expected goals ${p.expected} &middot; Lineup strength ${p.lineupNote} &middot; Confidence ${pct(confidence)}</div>
+              <div class="confidence confidence-scale" style="${confidenceStyle(confidence)}">Overall confidence ${pct(confidence)} &middot; Expected goals ${p.expected}</div>
             </div>
           </details>
         </article>
       `;
     })
     .join("");
-  attachLineupListeners();
-  attachOddsListeners();
-  attachSourceLinkListeners();
+  attachManualModelInputListeners();
+  attachFixtureDetailListeners();
 }
 
 function renderCompetitionList() {
@@ -1935,7 +2223,7 @@ function showTodaysMatches() {
   activeCompetitionId = TODAYS_MATCHES_ID;
   activePage = "league";
   hasSelectedCompetition = true;
-  activeView = "odds";
+  activeView = "predictions";
   localStorage.setItem("football-model-active-view-v2", activeView);
   loadState();
   populateTeamControls();
@@ -2034,7 +2322,8 @@ function lineupPlayers(text) {
 }
 
 function playerCandidate(fixture, side, role) {
-  const players = lineupPlayers(getLineup(fixture, side));
+  const manualPlayers = manualLineupPlayers(getManualInputs(fixture), side).filter(Boolean);
+  const players = manualPlayers.length ? manualPlayers : lineupPlayers(getLineup(fixture, side));
   if (!players.length) return null;
   if (role === "scorer") return players[Math.max(0, players.length - 1)] || players[0];
   if (role === "shots") return players[Math.max(0, players.length - 1)] || players[0];
@@ -2203,142 +2492,6 @@ function oddsMovementRows() {
     .slice(0, 8);
 }
 
-function renderOddsDashboard() {
-  const panel = el("oddsDashboard");
-  const week = getActiveGameweek();
-  const valueRows = valueDashboardRows();
-  const movementRows = oddsMovementRows();
-  const builderRows = recommendedBetBuilders();
-  const accumulator = recommendedAccumulator();
-  const liveFixtures = week?.fixtures.filter((fixture) => {
-    const key = fixtureKey(fixture);
-    return state.live?.[key]?.oddsUpdatedAt || Object.keys(state.odds?.[key] || {}).length;
-  }).length || 0;
-  const oddsLabel = liveFixtures === 1 ? "fixture" : "fixtures";
-  const backtest = predictionBacktest();
-
-  panel.innerHTML = `
-    <div class="odds-hero">
-      <div>
-        <span>Centre dashboard</span>
-        <strong>${week ? week.name : "Upcoming game week"}</strong>
-        <em>${liveFixtures} ${oddsLabel} with priced odds - recommendations rank model likelihood against entered or live prices</em>
-      </div>
-      <div class="odds-hero__stat">
-        <span>Best edge</span>
-        <strong>${valueRows[0] ? `${(valueRows[0].ev * 100).toFixed(1)}%` : "Not yet available"}</strong>
-      </div>
-    </div>
-    <div class="dashboard-grid">
-      <section class="dashboard-card dashboard-card--large">
-        <div class="dashboard-title">
-          <span>Recommended Bets</span>
-          <strong>${valueRows.length ? `${valueRows.length} selections` : "Not yet available"}</strong>
-        </div>
-        ${
-          valueRows.length
-            ? `<div class="dashboard-list">${valueRows.map((row) => `
-                <div class="dashboard-row">
-                  <div><strong>${escapeHtml(row.label)}</strong><span>${escapeHtml(row.fixtureLabel)} - ${marketLabel(row.key)}</span></div>
-                  <b>${formatOddsPrice(row.odds)}</b>
-                  <em>Probability ${pct(row.probability)}${row.implied ? ` / Implied ${pct(row.implied)}` : ""}${row.ev != null ? ` / EV ${(row.ev * 100).toFixed(1)}%` : " / value updates when odds arrive"}${row.stake ? ` / Stake ${(row.stake * 100).toFixed(1)}%` : ""}</em>
-                </div>
-              `).join("")}</div>`
-            : `<div class="empty empty--inline">Selections appear when fixtures have strong model probabilities.</div>`
-        }
-      </section>
-      <section class="dashboard-card">
-        <div class="dashboard-title">
-          <span>Recommended Bet Builder</span>
-          <strong>${builderRows.length ? "Highest combined probability" : "Not yet available"}</strong>
-        </div>
-        ${
-          builderRows.length
-            ? `<div class="dashboard-list">${builderRows.map((builder) => `
-                <div class="dashboard-row dashboard-row--stack">
-                  <div>
-                    <strong>${escapeHtml(builder.fixture.home)} v ${escapeHtml(builder.fixture.away)}</strong>
-                    <span>${builder.legs.map(legSummary).join(" + ")}</span>
-                  </div>
-                  <b>${formatCombinedOdds(builder.odds)}</b>
-                  <em>Combined probability ${pct(builder.probability)}${builder.value != null ? ` / EV ${(builder.value * 100).toFixed(1)}%` : " / value updates when odds arrive"}</em>
-                </div>
-              `).join("")}</div>`
-            : `<div class="empty empty--inline">Needs fixtures with strong enough model probabilities.</div>`
-        }
-      </section>
-      <section class="dashboard-card">
-        <div class="dashboard-title">
-          <span>Recommended Accumulator</span>
-          <strong>${accumulator ? `${accumulator.legs.length} selections` : "Not yet available"}</strong>
-        </div>
-        ${
-          accumulator
-            ? `<div class="dashboard-list">
-                ${accumulator.legs.map((leg) => `
-                  <div class="dashboard-row dashboard-row--compact">
-                    <div><strong>${escapeHtml(leg.label)}</strong><span>${escapeHtml(leg.fixtureLabel)} - ${marketLabel(leg.key)}</span></div>
-                    <b>${formatOddsPrice(leg.odds)}</b>
-                    <em>Probability ${pct(leg.probability)}</em>
-                  </div>
-                `).join("")}
-                <div class="value-summary value-summary--${accumulator.value != null && accumulator.value >= MODEL_SETTINGS.edgeThreshold ? "value" : "pass"}">
-                  <span>Combined accumulator</span>
-                  <strong>${formatCombinedOdds(accumulator.odds)}</strong>
-                  <em>Combined model probability ${pct(accumulator.probability)}${accumulator.value != null ? ` &middot; EV ${(accumulator.value * 100).toFixed(1)}%` : " &middot; odds value updates when prices arrive"}</em>
-                </div>
-              </div>`
-            : `<div class="empty empty--inline">Needs at least two strong selections in the game week.</div>`
-        }
-      </section>
-      <section class="dashboard-card">
-        <div class="dashboard-title">
-          <span>Biggest Price Movements</span>
-          <strong>${movementRows.length ? `${movementRows.length} tracked moves` : "Not yet available"}</strong>
-        </div>
-        ${
-          movementRows.length
-            ? `<div class="dashboard-list">${movementRows.map((row) => `
-                <div class="dashboard-row dashboard-row--compact">
-                  <div><strong>${escapeHtml(row.fixture.home)} v ${escapeHtml(row.fixture.away)}</strong><span>${marketLabel(row.market)}</span></div>
-                  <b>${formatOddsPrice(row.from)} -> ${formatOddsPrice(row.to)}</b>
-                  <em>${row.change > 0 ? "Drift" : "Shortened"} ${(Math.abs(row.pctChange) * 100).toFixed(1)}%</em>
-                </div>
-              `).join("")}</div>`
-            : `<div class="empty empty--inline">Needs two live odds refreshes to show movement.</div>`
-        }
-      </section>
-      <section class="dashboard-card">
-        <div class="dashboard-title">
-          <span>Model Accuracy</span>
-          <strong>${backtest.sample ? `${pct(backtest.oneXTwo)} 1X2` : "Not enough data"}</strong>
-        </div>
-        <div class="mini-metrics">
-          <div><span>BTTS</span><strong>${backtest.sample ? pct(backtest.btts) : "-"}</strong></div>
-          <div><span>Goals line</span><strong>${backtest.sample ? pct(backtest.ou25) : "-"}</strong></div>
-          <div><span>Exact</span><strong>${backtest.sample ? pct(backtest.exact) : "-"}</strong></div>
-          <div><span>ROI</span><strong>${backtest.sample ? `${(backtest.valueRoi * 100).toFixed(1)}%` : "-"}</strong></div>
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function renderValueSummary(key, prediction) {
-  const odds = state.odds?.[key] || {};
-  const rows = bestBetRows(prediction, odds);
-  const best = rows[0];
-  if (!best) return '<div class="value-summary muted">Live bookmaker odds not yet available.</div>';
-  const status = best.ev >= MODEL_SETTINGS.edgeThreshold ? "value" : "pass";
-  return `
-    <div class="value-summary value-summary--${status}">
-      <span>${status === "value" ? "Value flag" : "No clear value"}</span>
-      <strong>${escapeHtml(best.label)} at ${formatOddsPrice(best.odds)}</strong>
-      <em>Model ${pct(best.probability)} &middot; Implied ${pct(best.implied)} &middot; EV ${(best.ev * 100).toFixed(1)}% &middot; Quarter Kelly ${(best.stake * 100).toFixed(1)}% bank</em>
-    </div>
-  `;
-}
-
 function renderModelPerformance() {
   const panels = [el("modelPerformance"), el("homeModelPerformance")].filter(Boolean);
   if (!panels.length) return;
@@ -2415,33 +2568,6 @@ function renderModelPerformance() {
   });
 }
 
-function renderLiveNotes(live = {}, odds = {}, sources = {}) {
-  const hasOdds = Object.keys(odds || {}).length > 0;
-  const hasSource = Boolean(sources.odds || sources.lineups || sources.stats);
-  if (!live || (!live.xg && !live.teamNews && !live.oddsUpdatedAt && !live.lineupsUpdatedAt && !hasOdds && !hasSource)) return "";
-  const xgText = live.xg ? `xG feed ${decimal(live.xg.home)}-${decimal(live.xg.away)}` : "xG pending";
-  const oddsText = live.oddsUpdatedAt
-    ? live.oddsSource === "source URL"
-      ? "Odds from URL"
-      : live.oddsSource === "research notes"
-        ? "Odds from notes"
-        : "Odds live"
-    : hasOdds
-      ? "Odds entered"
-      : sources.odds
-        ? "Odds link saved"
-        : "Odds pending";
-  const lineupText = live.lineupsUpdatedAt ? "Lineups live" : "Lineups pending";
-  return `
-    <div class="live-notes">
-      <span>${oddsText}</span>
-      <span>${lineupText}</span>
-      <span>${xgText}</span>
-      ${live.teamNews ? `<em>${escapeHtml(live.teamNews)}</em>` : ""}
-    </div>
-  `;
-}
-
 function renderChrome() {
   const config = activeConfig();
   const matchCount = state.matches.length;
@@ -2476,11 +2602,17 @@ function renderChrome() {
 }
 
 function renderView() {
+  const todaysMatches = activeCompetitionId === TODAYS_MATCHES_ID;
+  if (todaysMatches && activeView === "backtest") activeView = "predictions";
+  const viewTabs = document.querySelector(".view-tabs");
+  if (viewTabs) viewTabs.hidden = todaysMatches;
   document.querySelectorAll(".view-tab").forEach((tab) => {
     tab.classList.toggle("is-active", tab.dataset.view === activeView);
+    if (tab.dataset.view === "backtest") tab.hidden = todaysMatches;
   });
   document.querySelectorAll(".view-panel").forEach((panel) => {
-    panel.classList.toggle("view-panel--active", panel.id === `${activeView}Dashboard` || panel.id === `${activeView}View`);
+    const isBacktest = panel.id === "backtestView";
+    panel.classList.toggle("view-panel--active", (!todaysMatches || !isBacktest) && (panel.id === `${activeView}Dashboard` || panel.id === `${activeView}View`));
   });
 }
 
@@ -2491,12 +2623,12 @@ function switchView(view) {
 }
 
 function renderAll() {
+  rememberOpenFixtures();
   renderChrome();
   renderCompetitionList();
   renderView();
   renderPageVisibility();
   renderModelPerformance();
-  renderOddsDashboard();
   renderBacktest();
   renderBacktestDetails();
   renderPredictions();
@@ -2508,8 +2640,8 @@ function renderBacktest() {
     el("backtestPanel").innerHTML = `
       <div class="backtest-card">
         <span>Backtest</span>
-        <strong>Building historical record</strong>
-        <em>This page starts once at least 80 real completed matches are available for this competition.</em>
+        <strong>No eligible tracked results yet</strong>
+        <em>Enter match statistics and press Update prediction before kick-off. The finished result will then appear here automatically.</em>
       </div>
     `;
     return;
@@ -2517,8 +2649,8 @@ function renderBacktest() {
   el("backtestPanel").innerHTML = `
     <div class="backtest-card">
       <span>Rolling backtest</span>
-      <strong>${backtest.sample} recent historical matches</strong>
-      <em>Uses only matches before each tested fixture.</em>
+      <strong>${backtest.sample} tracked predictions</strong>
+      <em>Only includes predictions saved with statistical input before the final result.</em>
     </div>
     <div class="backtest-metrics">
       <div><span>1X2 hit</span><strong>${pct(backtest.oneXTwo)}</strong></div>
@@ -2526,24 +2658,19 @@ function renderBacktest() {
       <div><span>Goals line hit</span><strong>${pct(backtest.ou25)}</strong></div>
       <div><span>Exact score</span><strong>${pct(backtest.exact)}</strong></div>
       <div><span>Brier</span><strong>${backtest.brier.toFixed(3)}</strong></div>
-      <div><span>Value bets</span><strong>${backtest.valueBets}</strong></div>
-      <div><span>Flat ROI</span><strong>${(backtest.valueRoi * 100).toFixed(1)}%</strong></div>
     </div>
   `;
 }
 
 function historicalPredictionRows(limit = 30) {
-  const completed = realCompletedMatches();
-  if (completed.length < 80) return [];
-  const teams = activeTeams();
+  const completed = backtestCompletedMatches();
+  if (!completed.length) return [];
   const ordered = [...completed]
-    .filter((match) => teams.includes(match.home) && teams.includes(match.away))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
-  const warmup = Math.min(420, Math.floor(ordered.length * 0.55));
-  return ordered.slice(warmup).slice(-limit).map((match, index, sample) => {
+  return ordered.slice(-limit).map((match, index, sample) => {
     const matchIndex = ordered.indexOf(match);
     const prior = ordered.slice(0, matchIndex);
-    const prediction = predictFixture({ date: match.date, home: match.home, away: match.away }, prior, false);
+    const prediction = match.predictionSnapshot || predictFixture({ date: match.date, home: match.home, away: match.away }, prior, false);
     const actual = match.hg > match.ag ? "H" : match.hg === match.ag ? "D" : "A";
     const pick = prediction.homeWin > prediction.draw && prediction.homeWin > prediction.awayWin ? "H" : prediction.draw > prediction.awayWin ? "D" : "A";
     const pickLabel = pick === "H" ? match.home : pick === "A" ? match.away : "Draw";
@@ -2604,6 +2731,72 @@ function renderBacktestDetails() {
   `;
 }
 
+function saveManualModelInputs(card) {
+  if (!card?.dataset.fixtureKey) return false;
+  const key = card.dataset.fixtureKey;
+  if (!state.sourceLinks[key]) state.sourceLinks[key] = {};
+  card.querySelectorAll("[data-model-input]").forEach((input) => {
+    const name = input.dataset.modelInput;
+    const value = input.value.trim();
+    if (value) {
+      state.sourceLinks[key][name] = value;
+    } else {
+      delete state.sourceLinks[key][name];
+    }
+  });
+  ["home", "away"].forEach((side) => {
+    const formation = card.querySelector(`[data-formation-side="${side}"]`)?.value || "4-3-3";
+    const players = [...card.querySelectorAll(`[data-lineup-player][data-lineup-side="${side}"]`)]
+      .sort((a, b) => Number(a.dataset.lineupIndex) - Number(b.dataset.lineupIndex))
+      .map((input) => input.value.trim());
+    state.sourceLinks[key][`${side}Formation`] = formation;
+    state.sourceLinks[key][`${side}StartingXI`] = players;
+  });
+  state.sourceLinks[key].manualUpdatedAt = new Date().toISOString();
+  const fixture = findFixtureByKey(key);
+  if (fixture && hasEnteredStats(state.sourceLinks[key])) {
+    const prediction = predictFixture(fixture);
+    state.sourceLinks[key].predictionSnapshot = {
+      capturedAt: new Date().toISOString(),
+      score: prediction.score,
+      winner: prediction.winner,
+      doubleChance: prediction.doubleChance,
+      btts: prediction.btts,
+      goals: prediction.goals,
+      homeWin: prediction.homeWin,
+      draw: prediction.draw,
+      awayWin: prediction.awayWin,
+    };
+  } else {
+    delete state.sourceLinks[key].predictionSnapshot;
+  }
+  saveState();
+  return true;
+}
+
+function attachManualModelInputListeners() {
+  document.querySelectorAll("[data-fixture-key] [data-formation-side]").forEach((select) => {
+    select.addEventListener("change", (event) => {
+      const card = event.target.closest("[data-fixture-key]");
+      const side = event.target.dataset.formationSide;
+      const fields = card?.querySelector(`[data-player-fields="${side}"]`);
+      if (!fields) return;
+      const players = [...fields.querySelectorAll("[data-lineup-player]")]
+        .sort((a, b) => Number(a.dataset.lineupIndex) - Number(b.dataset.lineupIndex))
+        .map((input) => input.value);
+      fields.innerHTML = renderLineupPlayerFields(side, event.target.value, players);
+    });
+  });
+  document.querySelectorAll("[data-fixture-key] [data-model-submit]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-fixture-key]");
+      if (!saveManualModelInputs(card)) return;
+      if (card?.dataset.fixtureKey) openFixtureKeys.add(card.dataset.fixtureKey);
+      renderAll();
+    });
+  });
+}
+
 function attachLineupListeners() {
   document.querySelectorAll("[data-fixture-key] [data-lineup-side]").forEach((textarea) => {
     textarea.addEventListener("input", (event) => {
@@ -2622,6 +2815,7 @@ function attachSourceLinkListeners() {
   const persistSourceInputs = (card) => {
     if (!card) return false;
     if (!state.sourceLinks[card.dataset.fixtureKey]) state.sourceLinks[card.dataset.fixtureKey] = {};
+    delete state.sourceLinks[card.dataset.fixtureKey].odds;
     card.querySelectorAll("[data-source-key]").forEach((input) => {
       const sourceKey = input.dataset.sourceKey;
       const value = input.value.trim();
@@ -2639,40 +2833,26 @@ function attachSourceLinkListeners() {
     const fixture = findFixtureByKey(card.dataset.fixtureKey);
     const sources = state.sourceLinks[card.dataset.fixtureKey];
     const scans = [];
-    let oddsText = sources.notes || "";
     let statsText = sources.notes || "";
 
     if (scanLinks) {
       const blocked = [];
-      if (sources.odds) {
-        const scan = await scanSourceUrl(sources.odds);
-        scans.push(scan.ok ? "Odds URL read" : "Odds URL blocked");
-        if (!scan.ok) blocked.push("Odds URL");
-        if (scan.ok) oddsText = `${oddsText} ${scan.text}`;
-      }
-      if (sources.stats) {
-        const scan = await scanSourceUrl(sources.stats);
-        scans.push(scan.ok ? "Stats URL read" : "Stats URL blocked");
-        if (!scan.ok) blocked.push("Stats URL");
-        if (scan.ok) statsText = `${statsText} ${scan.text}`;
-      }
+      const sourceJobs = [
+        { key: "lineups", label: "Lineups URL", url: sources.lineups },
+        { key: "stats", label: "Stats URL", url: sources.stats },
+      ].filter((source) => source.url);
+      const results = await Promise.all(sourceJobs.map(async (source) => ({ ...source, scan: await scanSourceUrl(source.url) })));
+      results.forEach(({ key, label, scan }) => {
+        scans.push(scan.ok ? `${label} read` : `${label} blocked`);
+        if (!scan.ok) blocked.push(label);
+        if (!scan.ok) return;
+        statsText = `${statsText} ${scan.text}`;
+      });
       if (blocked.length && typeof window !== "undefined" && typeof window.alert === "function") {
-        window.alert(`${blocked.join(" and ")} could not be read automatically. The link has been saved, but this site may block automated reading.`);
+        window.alert(`${blocked.join(" and ")} could not be read automatically. The link has been saved, and any readable sources were still used.`);
       }
     }
 
-    const parsedOdds = oddsFromResearchNotes(oddsText, fixture);
-    if (Object.keys(parsedOdds).length) {
-      state.odds[card.dataset.fixtureKey] = {
-        ...(state.odds[card.dataset.fixtureKey] || {}),
-        ...parsedOdds,
-      };
-      state.live[card.dataset.fixtureKey] = {
-        ...(state.live[card.dataset.fixtureKey] || {}),
-        oddsUpdatedAt: new Date().toISOString(),
-        oddsSource: scanLinks ? "source URL" : "research notes",
-      };
-    }
     if (hasStatsSignal(statsText)) {
       state.sourceLinks[card.dataset.fixtureKey].statsSignal = "Stats source includes match-stat context";
       state.live[card.dataset.fixtureKey] = {
@@ -2705,6 +2885,7 @@ function attachSourceLinkListeners() {
       button.disabled = true;
       try {
         if (!await saveSourceInputs(card, true)) return;
+        if (card?.dataset.fixtureKey) openFixtureKeys.add(card.dataset.fixtureKey);
         renderAll();
       } catch {
         if (typeof window !== "undefined" && typeof window.alert === "function") {
@@ -2713,24 +2894,6 @@ function attachSourceLinkListeners() {
         button.textContent = "Update prediction";
         button.disabled = false;
       }
-    });
-  });
-}
-
-function attachOddsListeners() {
-  document.querySelectorAll("[data-fixture-key] [data-odds-key]").forEach((input) => {
-    input.addEventListener("change", (event) => {
-      const card = event.target.closest("[data-fixture-key]");
-      if (!card) return;
-      if (!state.odds[card.dataset.fixtureKey]) state.odds[card.dataset.fixtureKey] = {};
-      const value = Number(event.target.value);
-      if (Number.isFinite(value) && value > 1) {
-        state.odds[card.dataset.fixtureKey][event.target.dataset.oddsKey] = value;
-      } else {
-        delete state.odds[card.dataset.fixtureKey][event.target.dataset.oddsKey];
-      }
-      saveState();
-      renderAll();
     });
   });
 }
@@ -2776,57 +2939,18 @@ async function refreshCurrentSeasonResults() {
 }
 
 function mergeLiveGame(game) {
+  const hasUsableContext = Boolean(game.xg || game.teamNews || game.lineups?.home || game.lineups?.away || game.completed);
+  if (!hasUsableContext) return false;
+  if (activeCompetitionId === TODAYS_MATCHES_ID && game.completed) {
+    state.gameweeks.forEach((week) => {
+      week.fixtures = week.fixtures.filter((fixture) => !(teamMatch(fixture.home, game.home) && teamMatch(fixture.away, game.away)));
+    });
+    return true;
+  }
   const fixture = findFixtureForLiveGame(game) || addFixtureFromLiveGame(game);
   if (!fixture) return false;
   const key = fixtureKey(fixture);
   if (!state.live[key]) state.live[key] = {};
-
-  if (game.odds) {
-    if (!state.odds[key]) state.odds[key] = {};
-    const previousOdds = { ...state.odds[key] };
-    const movement = {};
-    [
-      "home",
-      "draw",
-      "away",
-      "bttsYes",
-      "bttsNo",
-      "over25",
-      "under25",
-      "cornersOver95",
-      "cornersUnder95",
-      "playerBooked",
-      "playerScorer",
-      "playerFouled1",
-      "playerFouled2",
-      "playerFouled3",
-      "playerShots1",
-      "playerShots2",
-      "playerShots3",
-      "playerShots4",
-      "playerSot1",
-      "playerSot2",
-      "playerSot3",
-    ].forEach((market) => {
-      const nextPrice = Number(game.odds[market]);
-      const previousPrice = Number(previousOdds[market]);
-      if (Number.isFinite(nextPrice) && nextPrice > 1) {
-        if (Number.isFinite(previousPrice) && previousPrice > 1 && Math.abs(previousPrice - nextPrice) >= 0.01) {
-          movement[market] = {
-            from: previousPrice,
-            to: nextPrice,
-            change: nextPrice - previousPrice,
-            pctChange: (nextPrice - previousPrice) / previousPrice,
-            updatedAt: game.oddsUpdatedAt || new Date().toISOString(),
-          };
-        }
-        state.odds[key][market] = nextPrice;
-      }
-    });
-    if (Object.keys(movement).length) state.live[key].oddsMovement = { ...(state.live[key].oddsMovement || {}), ...movement };
-    state.live[key].previousOdds = previousOdds;
-    state.live[key].oddsUpdatedAt = game.oddsUpdatedAt || new Date().toISOString();
-  }
 
   if (game.lineups) {
     if (!state.lineups[key]) state.lineups[key] = {};
@@ -2841,12 +2965,80 @@ function mergeLiveGame(game) {
   }
 
   if (game.teamNews) state.live[key].teamNews = game.teamNews;
+  if (game.completed && Number.isFinite(Number(game.result?.home)) && Number.isFinite(Number(game.result?.away))) {
+    const research = state.sourceLinks?.[key];
+    if (!hasEnteredStats(research) || !research?.predictionSnapshot) return true;
+    const completedMatch = {
+      date: fixture.date || game.date || todayDateString(),
+      home: fixture.home,
+      away: fixture.away,
+      hg: Number(game.result.home),
+      ag: Number(game.result.away),
+      season: "2026-27",
+      provider: "API-Football",
+      backtestEligible: true,
+      predictionSnapshot: research.predictionSnapshot,
+    };
+    const existingIndex = state.matches.findIndex((match) =>
+      isCurrentSeasonMatch(match) &&
+      match.home === completedMatch.home &&
+      match.away === completedMatch.away &&
+      String(match.date || "").slice(0, 10) === completedMatch.date
+    );
+    if (existingIndex >= 0) state.matches[existingIndex] = completedMatch;
+    else state.matches.push(completedMatch);
+    backtestCache = {};
+    performanceSummaryCache = null;
+  }
+  return true;
+}
+
+function persistCompletedGameForCompetition(game, competitionId, research) {
+  if (!game.completed || !COMPETITIONS[competitionId]) return false;
+  if (!hasEnteredStats(research) || !research?.predictionSnapshot) return false;
+  const homeGoals = Number(game.result?.home);
+  const awayGoals = Number(game.result?.away);
+  if (!Number.isFinite(homeGoals) || !Number.isFinite(awayGoals)) return false;
+  const config = COMPETITIONS[competitionId];
+  let competitionState;
+  try {
+    competitionState = JSON.parse(localStorage.getItem(config.storageKey) || "null");
+  } catch {
+    competitionState = null;
+  }
+  if (!competitionState || !Array.isArray(competitionState.matches)) competitionState = createInitialState(competitionId);
+  const completedMatch = {
+    date: game.date || todayDateString(),
+    home: normalizeTeam(game.home),
+    away: normalizeTeam(game.away),
+    hg: homeGoals,
+    ag: awayGoals,
+    season: "2026-27",
+    provider: "API-Football",
+    backtestEligible: true,
+    predictionSnapshot: research.predictionSnapshot,
+  };
+  const existingIndex = competitionState.matches.findIndex((match) =>
+    isCurrentSeasonMatch(match) &&
+    match.home === completedMatch.home &&
+    match.away === completedMatch.away &&
+    String(match.date || "").slice(0, 10) === completedMatch.date
+  );
+  if (existingIndex >= 0) competitionState.matches[existingIndex] = completedMatch;
+  else competitionState.matches.push(completedMatch);
+  if (!competitionState.sourceLinks || typeof competitionState.sourceLinks !== "object") competitionState.sourceLinks = {};
+  const researchKey = [competitionId, completedMatch.date, completedMatch.home, completedMatch.away].join("|");
+  competitionState.sourceLinks[researchKey] = research;
+  competitionState.updatedAt = new Date().toISOString();
+  localStorage.setItem(config.storageKey, JSON.stringify(competitionState));
   return true;
 }
 
 async function refreshLiveData() {
-  el("liveDataStamp").textContent = "Checking market";
-  el("liveDataSummary").textContent = "Updating";
+  const liveDataStamp = el("liveDataStamp");
+  const liveDataSummary = el("liveDataSummary");
+  if (liveDataStamp) liveDataStamp.textContent = "Checking market";
+  if (liveDataSummary) liveDataSummary.textContent = "Updating";
   try {
     const ids = activeCompetitionId === TODAYS_MATCHES_ID ? competitionIds() : [activeCompetitionId];
     const payloads = await Promise.all(
@@ -2856,16 +3048,59 @@ async function refreshLiveData() {
         return response.json();
       }),
     );
-    const merged = payloads
-      .flatMap((payload, index) => (payload.games || []).map((game) => ({ ...game, competitionId: ids[index] })))
-      .filter(mergeLiveGame).length;
+    let merged = 0;
+    const competitions = payloads.map((payload, index) => {
+      const competitionId = ids[index];
+      const games = payload.games || [];
+      if (activeCompetitionId === TODAYS_MATCHES_ID) {
+        games.forEach((game) => {
+          if (!game.completed) return;
+          const fixture = findFixtureForLiveGame({ ...game, competitionId });
+          const research = fixture ? state.sourceLinks?.[fixtureKey(fixture)] : null;
+          persistCompletedGameForCompetition(game, competitionId, research);
+        });
+      }
+      const matchedGames = games.map((game) => ({ ...game, competitionId })).filter(mergeLiveGame).length;
+      merged += matchedGames;
+      const diagnostics = payload.diagnostics || {};
+      return {
+        competitionId,
+        returnedGames: games.length,
+        matchedGames,
+        pricedGames: diagnostics.odds?.pricedGames || 0,
+        contextGames: diagnostics.football?.contextGames || 0,
+        xgGames: diagnostics.football?.xgGames || 0,
+        lineupGames: diagnostics.football?.lineupGames || 0,
+        oddsMessage: diagnostics.odds?.message || payload.providerStatus || "",
+        footballMessage: diagnostics.football?.message || "",
+        error: [diagnostics.odds?.errors?.[0], diagnostics.football?.errors?.[0]].filter(Boolean).join(" / "),
+      };
+    });
+    state.apiStatus = {
+      checkedAt: new Date().toISOString(),
+      competitions,
+    };
     state.live.lastRefresh = new Date().toISOString();
     if (activeCompetitionId !== TODAYS_MATCHES_ID) saveState();
-    el("liveDataStamp").textContent = merged ? "Market data updated" : "Market watch ready";
-    el("liveDataSummary").textContent = merged ? `${merged} matches refreshed` : "No new movement";
+    if (liveDataStamp) liveDataStamp.textContent = merged ? "Market data updated" : "Market watch ready";
+    const returned = competitions.reduce((sum, row) => sum + Number(row.returnedGames || 0), 0);
+    if (liveDataSummary) liveDataSummary.textContent = merged ? `${merged} matches refreshed` : returned ? `${returned} provider games found, none matched` : "No provider games found";
   } catch (error) {
-    el("liveDataStamp").textContent = "Market watch ready";
-    el("liveDataSummary").textContent = "Updates when available";
+    if (liveDataStamp) liveDataStamp.textContent = "Market watch ready";
+    if (liveDataSummary) liveDataSummary.textContent = "API check failed";
+    state.apiStatus = {
+      checkedAt: new Date().toISOString(),
+      competitions: [
+        {
+          competitionId: activeCompetitionId,
+          returnedGames: 0,
+          matchedGames: 0,
+          oddsMessage: "API check failed",
+          footballMessage: "",
+          error: error.message || "Could not reach live-data route",
+        },
+      ],
+    };
     console.warn("Live data refresh failed", error);
   }
   renderAll();
@@ -2873,6 +3108,7 @@ async function refreshLiveData() {
 
 function startLiveDataMonitor() {
   if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+  if (finishedFixtureTimer) clearInterval(finishedFixtureTimer);
   liveRefreshTimer = setInterval(() => {
     if (document.hidden) return;
     refreshLiveData();
@@ -2880,6 +3116,15 @@ function startLiveDataMonitor() {
   if (document.addEventListener) document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refreshLiveData();
   });
+  finishedFixtureTimer = setInterval(() => {
+    if (document.hidden || activeCompetitionId !== TODAYS_MATCHES_ID) return;
+    const before = state.gameweeks.reduce((sum, week) => sum + week.fixtures.length, 0);
+    state.gameweeks.forEach((week) => {
+      week.fixtures = week.fixtures.filter((fixture) => !fixtureFinishWindowPassed(fixture));
+    });
+    const after = state.gameweeks.reduce((sum, week) => sum + week.fixtures.length, 0);
+    if (after !== before) renderPredictions();
+  }, 60 * 1000);
 }
 
 function addFixture() {
@@ -2923,7 +3168,7 @@ function switchCompetition(competitionId) {
   hasSelectedCompetition = true;
   localStorage.setItem("football-model-active-competition", activeCompetitionId);
   localStorage.setItem("football-model-has-selected-competition", "true");
-  activeView = "odds";
+  activeView = "predictions";
   localStorage.setItem("football-model-active-view-v2", activeView);
   loadState();
   populateTeamControls();

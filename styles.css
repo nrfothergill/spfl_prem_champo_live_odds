@@ -911,6 +911,61 @@ textarea {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.api-status-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+  gap: 14px;
+  margin: 14px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7fbff;
+}
+
+.api-status-panel span,
+.api-status-panel em {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.api-status-panel strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+}
+
+.api-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.api-status-grid div,
+.api-status-list div {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+}
+
+.api-status-list {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+}
+
+.api-status-list span {
+  margin-top: 4px;
+}
+
+.api-status-list em {
+  margin-top: 6px;
+  color: #9b2c2c;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.8fr);
@@ -1254,6 +1309,187 @@ textarea {
   margin-top: 16px;
 }
 
+.prediction-core {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.model-input-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 14px;
+  padding: 12px;
+  background: #fbfcfb;
+}
+
+.model-input-panel {
+  background: #f7fbff;
+}
+
+.input-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.input-head span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.input-head strong {
+  color: var(--green-dark);
+  font-size: 0.86rem;
+}
+
+.model-input-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.model-input-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.model-input-grid input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 8px;
+  font-weight: 800;
+}
+
+.model-notes {
+  display: block;
+  margin-top: 10px;
+}
+
+.starting-xi-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.team-sheet {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.team-sheet-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.team-sheet-head > strong {
+  font-size: 0.92rem;
+}
+
+.team-sheet-head label {
+  min-width: 120px;
+}
+
+.team-sheet select,
+.player-position input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 8px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.player-fields {
+  position: relative;
+  display: flex;
+  min-height: 500px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  overflow: hidden;
+  border: 2px solid rgb(255 255 255 / 82%);
+  border-radius: 8px;
+  padding: 18px 10px;
+  background:
+    linear-gradient(to bottom, transparent calc(50% - 1px), rgb(255 255 255 / 72%) 50%, transparent calc(50% + 1px)),
+    repeating-linear-gradient(0deg, #177849 0, #177849 62px, #1d8552 62px, #1d8552 124px);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%);
+}
+
+.player-fields::before,
+.player-fields::after {
+  position: absolute;
+  left: 50%;
+  content: "";
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.player-fields::before {
+  top: calc(50% - 42px);
+  width: 82px;
+  height: 82px;
+  border: 1px solid rgb(255 255 255 / 72%);
+  border-radius: 50%;
+}
+
+.player-fields::after {
+  top: 0;
+  width: 44%;
+  height: 58px;
+  border: 1px solid rgb(255 255 255 / 72%);
+  border-top: 0;
+}
+
+.formation-line {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 5px;
+}
+
+.player-position {
+  display: flex;
+  min-width: 0;
+  max-width: 112px;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.player-position > span {
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 55%);
+}
+
+.player-position input {
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 5px;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
 .lineup-editor {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1309,7 +1545,7 @@ textarea {
 
 .source-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -1422,6 +1658,16 @@ textarea {
   background: #f7faf8;
 }
 
+.confidence-scale {
+  border-color: hsl(var(--confidence-hue) 62% 42%);
+  background: hsl(var(--confidence-hue) 68% 94%);
+}
+
+.confidence-scale strong,
+.confidence-scale em {
+  color: hsl(var(--confidence-hue) 72% 24%);
+}
+
 .market span {
   display: block;
   color: var(--muted);
@@ -1437,6 +1683,15 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.market em {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .confidence {
   display: inline-flex;
   min-height: 30px;
@@ -1444,7 +1699,7 @@ textarea {
   margin-top: 14px;
   border-radius: 999px;
   padding: 0 10px;
-  background: #e8f6ff;
+  background: hsl(var(--confidence-hue, 200) 68% 94%);
   color: var(--green-dark);
   font-size: 0.82rem;
   font-weight: 900;
@@ -1467,6 +1722,7 @@ textarea {
   .prediction-grid,
   .dashboard-grid,
   .odds-hero,
+  .api-status-panel,
   .performance-hero,
   .performance-row,
   .history-row,
@@ -1475,9 +1731,14 @@ textarea {
   }
 
   .backtest-metrics,
+  .starting-xi-editor,
   .history-summary,
   .performance-metrics,
+  .prediction-core,
+  .result-grid,
+  .model-input-grid,
   .trend-grid,
+  .api-status-grid,
   .odds-grid,
   .source-grid,
   .live-notes {
@@ -1512,12 +1773,31 @@ textarea {
   .dashboard-row--compact,
   .history-summary,
   .performance-metrics,
+  .prediction-core,
+  .result-grid,
+  .model-input-grid,
   .trend-grid,
   .trust-strip,
+  .api-status-grid,
   .odds-grid,
   .source-grid,
   .live-notes {
     grid-template-columns: 1fr;
+  }
+
+  .player-fields {
+    min-height: 430px;
+    padding-inline: 5px;
+  }
+
+  .team-sheet-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .player-position input {
+    padding-inline: 2px;
+    font-size: 0.66rem;
   }
 
   .dashboard-row b {

@@ -1,5 +1,37 @@
 Fixture IQ
 
+Accuracy improvements in V47
+- Historical matches decay by their actual age rather than their row position.
+- Low-sample team ratings are pulled toward informed priors until enough results exist.
+- Elo ratings account for home advantage and dampen unusually large scorelines.
+- A Dixon-Coles low-score adjustment improves modelling of 0-0, 1-0, 0-1 and 1-1 results.
+
+Starting XI editor in V48
+- Select a formation independently for each team.
+- Enter all eleven players in position-labelled fields.
+- Saved formations make a small tactical adjustment and complete team sheets feed the lineup model.
+
+Matchday presentation in V49
+- Starting XI fields are arranged on a pitch in the selected formation.
+- Today's Matches is prediction-only and no longer displays a backtest page.
+- Today's completed scores are saved into the correct competition backtest.
+
+Tracked backtests in V50
+- Finished fixtures disappear from Today's Matches.
+- Current-season results enter backtesting only after xG or statistical notes have been saved.
+- The prediction is captured when Update prediction is pressed, before the final result is known.
+
+UEFA qualification fixtures in V51
+- Bundles UEFA-confirmed Champions League, Europa League and Conference League first-round fixtures.
+- Includes all 27 Europa/Conference first legs on 9 July in UK time and the confirmed return legs.
+- Migrates previously saved empty qualifying rounds automatically.
+- API context can update lineups, xG and results, but cannot create unverified UEFA fixtures.
+
+Today's fixture cleanup in V52
+- Removes fixtures immediately when the provider reports a final result.
+- Uses a 150-minute UK-time completion window as a fallback when provider status is delayed.
+- Rechecks the visible Today list every minute and filters stale fixtures on every page load.
+
 Open index.html in a browser to use Fixture IQ.
 
 Competition tabs:
@@ -44,51 +76,31 @@ Weekly update flow:
 2. Model Performance opens as its own page from the sidebar or homepage button.
 3. The league workspace stays hidden until a competition is selected from the sidebar, then opens as its own page.
 2. The page checks the selected competition's current-season Football-Data CSV feed when opened and when Refresh Results is pressed, where a feed is available.
-3. New results are merged automatically, then the dashboard moves to the next incomplete game week.
+3. New results are merged automatically, then the site moves to the next incomplete game week.
 4. Export Data to save the current model state.
 
-Dashboard pages:
-- Today's Matches: a combined daily workspace using the same odds dashboard, prediction cards, and markets as competition pages.
+Workspace pages:
+- Today's Matches: a combined daily workspace using the same prediction cards as competition pages.
 - Model Performance: total tested matches, date range, accuracy/calibration metrics, performance over time, and results by competition.
-- Odds Dashboard: recommended bets, recommended bet builders, recommended accumulators, biggest tracked price moves, model likelihood versus implied odds, and quick accuracy stats.
-- Predictions: predicted scores, 1X2, double chance, BTTS, over/under 2.5 goals, corners over/under, player booked, player fouled thresholds, player shots thresholds, player shots-on-target thresholds, player to score, odds input, value flag, and lineup notes.
-- Each prediction card opens as a foldable fixture row. Press the arrow to reveal the full prediction, odds, lineups, and research inputs.
-- Each prediction card includes Source Links for lineups, odds, and a broad stats URL for xG, shots, corners, cards, fouls, and other match data, plus research notes. These links are saved per fixture so manual research can be combined with lineup notes and bookmaker odds without needing a paid all-in-one data API.
-- Press Update prediction in the research inputs panel after adding notes or links to refresh the model output, recommended bets, bet builder, and accumulator with the latest saved research.
-- Odds and stats source links are saved per fixture. When deployed on Vercel, pressing Update prediction tries to read those URLs through /api/source-scan, parse decimal or fractional bookmaker odds, and detect useful stats context. Some bookmaker pages block automated reading; if that happens, a pop-up warning appears, the link is still saved, and manual odds boxes remain available.
-- Visible odds in the dashboard and value summaries are shown in UK bookmaker fractional style, such as 6/4 or 11/10.
-- Opened prediction cards show when the model was last updated for that fixture in UK time.
-- Goal and corner markets now show the strongest practical over/under line rather than always using over/under 2.5 goals and over/under 9.5 corners. Goals choose between 2.5 and 3.5; corners choose between 8.5, 9.5, and 10.5 when corner odds or corner research is available.
-- Corner recommendations only show when corner odds are entered or the research notes include corner/stat context. Otherwise the corner market stays "Not yet available" and is excluded from recommended bets.
+- Predictions: foldable fixture rows showing predicted score, predicted result, double chance, BTTS, and the most likely over/under goals line with confidence percentages.
+- Each prediction card includes a Result section for saving the final score into the model history.
+- Each prediction card includes manual model inputs for home/away team news, injuries, suspensions, rotation, xG scored, xG conceded, and stat/tempo notes. Press Update prediction after entering them to recalculate that fixture.
 - Backtest: recent settled historical predictions with winner, BTTS, over/under hit checks, plus overall rolling accuracy. New leagues begin showing backtest records once enough real completed matches are available.
 
 Prediction markets:
 - Predicted score
-- Winner
+- Predicted result
 - Double chance
 - BTTS
-- Over/under 2.5 goals
-- Over/under 9.5 corners
-- Most likely player to be booked
-- Most likely player fouled threshold, such as 2+ or 3+ fouled
-- Most likely player shots threshold, such as 2+ or 3+ shots
-- Most likely player shots-on-target threshold, such as 1+ or 2+ shots on target
-- Most likely player to score
-- Lineup-adjusted expected goals
-- Manual bookmaker odds input
-- Live bookmaker odds integration through /api/live-data
-- Value/edge flag
-- Biggest price movement tracker after repeated live odds refreshes
-- Market-implied probability blending when live or manual odds are available
-- Conservative quarter-Kelly staking guide
+- Most likely over/under goals line
+- Expected goals
+- Manual result entry
+- Manual team news, xG scored, xG conceded, and stat inputs
 - Rolling backtest metrics
-- Bet builder and accumulator recommendations prioritise the highest combined model probability, then improve the ranking when live odds show positive value.
 - UEFA Champions League, Europa League, and Conference League use live-provider qualification windows so exact qualifying fixtures can be inserted into the competition tab and Today's Matches when published.
 - Fixture kickoff times are displayed in UK time. The Champions League first qualifying round fixtures for 8 July 2026 are bundled into the Champions League tab and Today's Matches as a fallback while live provider data updates.
-- For a more reliable replacement, use a licensed data provider such as Sportradar, Stats Perform/Opta, Sportmonks, or Betfair Exchange API. BBC Sport and Paddy Power website pages are not stable public APIs and should not be scraped for production data.
 
 Model notes:
-- Weighted recency, attack/defence strength, Elo-style ratings, club priors, recent head-to-head, home advantage, form, bookmaker closing odds for historical analysis, and Poisson goal probabilities.
-- Lineup boxes accept starting XI, injury, suspension, rotation, and availability notes. Those notes adjust each team's attacking expectation.
-- The backtest uses only matches before each tested fixture and reports 1X2, BTTS, O/U 2.5, exact score, Brier score, value-bet count, and flat-stake ROI.
+- Weighted recency, attack/defence strength, Elo-style ratings, club priors, recent head-to-head, home advantage, form, manual team news, differently weighted home/away xG scored/conceded signals, historical odds where available, and Poisson goal probabilities.
+- The backtest uses only matches before each tested fixture and reports 1X2, BTTS, O/U goals, exact score, and Brier score.
 - Predictions are estimates, not betting advice. No model can guarantee profit.
